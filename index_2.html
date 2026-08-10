@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OFM CAPEX Projects — Live Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+:root{
+  /* OFM Brand */
+  --ofm-crimson:    #8B1A1A;
+  --ofm-crimson-d:  #6B0F0F;
+  --ofm-crimson-l:  #A52A2A;
+  --ofm-gold:       #D4A017;
+  --ofm-gold-d:     #B8860B;
+  --ofm-gold-l:     #F0C040;
+  --ofm-cream:      #FBF6EC;
+  --ofm-cream-d:    #F4ECD8;
+  --ofm-ivory:      #FFFAF0;
+
+  /* Functional */
+  --bg:        #FAF6EE;
+  --surface:   #FFFFFF;
+  --surface-2: #FCF8EE;
+  --border:    #E8DDC4;
+  --border-2:  #D4C29A;
+  --text:      #1F1611;
+  --text-2:    #5C4A3A;
+  --muted:     #8B7355;
+
+  /* Status */
+  --st-ip:     #1A5FA3;
+  --st-ip-bg:  #E0EBF7;
+  --st-co:     #0D7C4F;
+  --st-co-bg:  #D8F0E2;
+  --st-hol:    #B8860B;
+  --st-hol-bg: #FBEFC9;
+  --st-na:     #8B7355;
+  --st-na-bg:  #EFE8DA;
+
+  /* Charts */
+  --c1:#8B1A1A; --c2:#D4A017; --c3:#1A5FA3; --c4:#0D7C4F; --c5:#A0522D; --c6:#6B4423; --c7:#B8860B;
+
+  --shadow-sm: 0 1px 3px rgba(107,15,15,.06), 0 1px 2px rgba(107,15,15,.04);
+  --shadow:    0 4px 14px rgba(107,15,15,.08), 0 2px 6px rgba(107,15,15,.05);
+  --shadow-lg: 0 12px 32px rgba(107,15,15,.14), 0 4px 12px rgba(107,15,15,.08);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',-apple-system,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(circle at 0% 0%, rgba(212,160,23,.06) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(139,26,26,.05) 0%, transparent 40%);
+  background-attachment:fixed;
+  min-height:100vh;
+}
+
+/* ───── HEADER ───── */
+header{
+  background:linear-gradient(135deg,#6B0F0F 0%, #8B1A1A 50%, #A52A2A 100%);
+  color:#fff;
+  padding:18px 32px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 4px 18px rgba(107,15,15,.28);
+  border-bottom:3px solid var(--ofm-gold);
+}
+.head-wrap{max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;}
+.brand{display:flex;align-items:center;gap:18px;}
+.brand-logo{
+  width:64px;height:64px;
+  background:#fff;border-radius:12px;padding:5px;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.brand-logo img{width:100%;height:100%;object-fit:contain;}
+.brand-text h1{
+  font-family:'Fraunces',serif;
+  font-size:24px;font-weight:700;
+  letter-spacing:-.5px;line-height:1.1;
+  color:#fff;
+}
+.brand-text h1 em{
+  font-style:italic;color:var(--ofm-gold-l);font-weight:600;
+}
+.brand-text p{
+  font-size:11.5px;font-weight:500;letter-spacing:1.4px;text-transform:uppercase;
+  color:rgba(255,255,255,.78);margin-top:3px;
+}
+
+.live-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.13);
+  border:1px solid rgba(212,160,23,.45);
+  padding:6px 13px;border-radius:99px;
+  font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+}
+.live-dot{width:7px;height:7px;background:#4ADE80;border-radius:50%;box-shadow:0 0 0 3px rgba(74,222,128,.3);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+.head-meta{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+.head-meta-row{display:flex;gap:10px;align-items:center;}
+.head-pill{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.22);
+  padding:5px 12px;border-radius:99px;
+  font-size:11.5px;font-weight:600;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.head-pill b{color:var(--ofm-gold-l);font-weight:800;font-size:13px;}
+.refreshed{font-size:11px;color:rgba(255,255,255,.65);font-style:italic;}
+
+/* ───── FILTER BAR ───── */
+.filters{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:14px 32px;
+  position:sticky;top:99px;z-index:90;
+  box-shadow:var(--shadow-sm);
+}
+.filters-wrap{max-width:1600px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.fg{display:flex;flex-direction:column;gap:3px;}
+.flabel{
+  font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--muted);
+}
+.fctl{
+  background:var(--surface-2);
+  border:1.5px solid var(--border);
+  color:var(--text);
+  border-radius:8px;
+  padding:7px 11px;
+  font-size:13px;font-weight:500;
+  font-family:'Inter',sans-serif;
+  outline:none;cursor:pointer;
+  transition:all .15s;
+  min-width:140px;
+}
+.fctl:hover{border-color:var(--ofm-gold);}
+.fctl:focus{border-color:var(--ofm-crimson);box-shadow:0 0 0 3px rgba(139,26,26,.12);}
+.search-wrap{position:relative;}
+.search-wrap input{padding-left:32px;min-width:240px;}
+.search-wrap::before{
+  content:'⌕';
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:15px;font-weight:700;pointer-events:none;
+}
+.btn-clear{
+  background:transparent;border:1.5px solid var(--border-2);color:var(--text-2);
+  padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:all .15s;margin-left:auto;
+  text-transform:uppercase;letter-spacing:.6px;
+}
+.btn-clear:hover{background:var(--ofm-crimson);border-color:var(--ofm-crimson);color:#fff;}
+.rcount{
+  font-size:12px;color:var(--text-2);font-weight:600;
+  padding:7px 14px;background:var(--ofm-cream-d);border-radius:8px;
+  white-space:nowrap;
+}
+.rcount b{color:var(--ofm-crimson);font-weight:800;font-size:14px;}
+
+/* ───── MAIN ───── */
+main{max-width:1600px;margin:0 auto;padding:24px 32px 60px;}
+
+/* ───── KPI CARDS ───── */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;margin-bottom:22px;
+}
+.kpi{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px 18px 16px;
+  position:relative;overflow:hidden;
+  cursor:pointer;
+  transition:all .2s;
+  box-shadow:var(--shadow-sm);
+}
+.kpi::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--accent,var(--ofm-crimson));
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--accent,var(--ofm-gold));}
+.kpi.active{
+  background:linear-gradient(135deg,var(--ofm-cream) 0%, #fff 100%);
+  border-color:var(--accent,var(--ofm-crimson));
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent,var(--ofm-crimson)) 18%, transparent), var(--shadow);
+}
+.kpi-label{
+  font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.kpi-value{
+  font-family:'Fraunces',serif;
+  font-size:34px;font-weight:700;
+  color:var(--accent,var(--ofm-crimson));
+  letter-spacing:-1px;line-height:1;
+}
+.kpi-sub{font-size:11.5px;color:var(--text-2);font-weight:500;margin-top:6px;}
+.kpi.k-total{--accent:var(--ofm-crimson);}
+.kpi.k-ip{--accent:var(--st-ip);}
+.kpi.k-co{--accent:var(--st-co);}
+.kpi.k-hol{--accent:var(--st-hol);}
+.kpi.k-bud{--accent:var(--ofm-gold-d);}
+
+/* ───── FINANCIAL STRIP ───── */
+.fin-strip{
+  background:linear-gradient(135deg,#FFFAF0 0%, #F4ECD8 100%);
+  border:1px solid var(--border-2);
+  border-radius:14px;
+  padding:18px 24px;
+  margin-bottom:22px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr) 1.6fr;
+  gap:24px;
+  align-items:center;
+  box-shadow:var(--shadow-sm);
+  position:relative;overflow:hidden;
+}
+.fin-strip::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--ofm-crimson),var(--ofm-gold),var(--ofm-crimson));
+}
+.fin-item{display:flex;flex-direction:column;gap:4px;}
+.fin-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.fin-value{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--ofm-crimson-d);letter-spacing:-.5px;}
+.fin-value.gold{color:var(--ofm-gold-d);}
+.fin-value.green{color:var(--st-co);}
+.fin-progress-wrap{display:flex;flex-direction:column;gap:6px;}
+.fin-progress-head{display:flex;justify-content:space-between;align-items:baseline;}
+.fin-progress-bar{
+  height:14px;background:#fff;border:1px solid var(--border-2);
+  border-radius:99px;overflow:hidden;position:relative;
+}
+.fin-progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--ofm-crimson) 0%, var(--ofm-gold) 100%);
+  border-radius:99px;
+  transition:width .8s cubic-bezier(.4,.0,.2,1);
+  position:relative;
+}
+.fin-progress-fill::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.25),transparent);
+  border-radius:99px;
+}
+.fin-progress-pct{font-size:11px;color:var(--text-2);font-weight:600;}
+
+/* ───── CHARTS ───── */
+.charts-grid{
+  display:grid;
+  grid-template-columns:1.3fr 1fr 1fr;
+  gap:14px;margin-bottom:22px;
+}
+.chart-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px 20px;
+  box-shadow:var(--shadow-sm);
+  position:relative;overflow:hidden;
+}
+.chart-head{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+.chart-title{
+  font-family:'Fraunces',serif;
+  font-size:16px;font-weight:600;
+  color:var(--ofm-crimson-d);letter-spacing:-.2px;
+}
+.chart-sub{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.chart-body{position:relative;height:240px;}
+
+/* ───── TABLE ───── */
+.table-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+.table-head{
+  padding:18px 22px;
+  background:linear-gradient(180deg,var(--ofm-cream) 0%, #fff 100%);
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.table-title{
+  font-family:'Fraunces',serif;
+  font-size:18px;font-weight:600;color:var(--ofm-crimson-d);
+  letter-spacing:-.3px;
+}
+.table-actions{display:flex;gap:8px;}
+.btn-sec{
+  background:#fff;border:1.5px solid var(--border-2);color:var(--text);
+  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:all .15s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-sec:hover{border-color:var(--ofm-gold);background:var(--ofm-cream);}
+.btn-pri{
+  background:var(--ofm-crimson);border:1.5px solid var(--ofm-crimson);color:#fff;
+  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:all .15s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-pri:hover{background:var(--ofm-crimson-d);}
+
+.table-scroll{max-height:600px;overflow:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead{position:sticky;top:0;z-index:5;}
+thead th{
+  background:var(--ofm-crimson);
+  color:#fff;
+  padding:11px 12px;
+  text-align:left;
+  font-weight:700;
+  font-size:10.5px;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+  white-space:nowrap;
+  cursor:pointer;
+  user-select:none;
+  border-right:1px solid rgba(255,255,255,.12);
+  transition:background .15s;
+}
+thead th:hover{background:var(--ofm-crimson-d);}
+thead th .sort{font-size:10px;opacity:.6;margin-left:3px;}
+thead th.sorted{background:var(--ofm-crimson-d);}
+thead th.sorted .sort{opacity:1;color:var(--ofm-gold-l);}
+tbody td{
+  padding:11px 12px;
+  border-bottom:1px solid var(--border);
+  vertical-align:top;
+}
+tbody tr{transition:background .12s;cursor:pointer;}
+tbody tr:hover{background:var(--ofm-cream);}
+tbody tr:nth-child(even){background:var(--surface-2);}
+tbody tr:nth-child(even):hover{background:var(--ofm-cream-d);}
+.code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11.5px;font-weight:700;
+  color:var(--ofm-crimson-d);
+  background:var(--ofm-cream-d);
+  padding:3px 7px;border-radius:5px;
+  white-space:nowrap;
+}
+.proj-name{font-weight:600;color:var(--text);min-width:240px;max-width:340px;}
+.proj-name small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:2px;}
+.div-tag{
+  display:inline-block;
+  font-size:10.5px;font-weight:700;
+  padding:3px 8px;border-radius:99px;
+  background:var(--ofm-cream-d);color:var(--ofm-crimson-d);
+  border:1px solid var(--border-2);
+  white-space:nowrap;
+}
+.status-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+  padding:3.5px 9px;border-radius:99px;
+  white-space:nowrap;
+}
+.status-pill.s-IP{background:var(--st-ip-bg);color:var(--st-ip);border:1px solid #BACFE6;}
+.status-pill.s-CO{background:var(--st-co-bg);color:var(--st-co);border:1px solid #B5DDC1;}
+.status-pill.s-HOL{background:var(--st-hol-bg);color:var(--st-hol);border:1px solid #ECCB7A;}
+.status-pill.s-NA{background:var(--st-na-bg);color:var(--st-na);border:1px solid var(--border-2);}
+.status-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
+.num{font-variant-numeric:tabular-nums;font-weight:600;text-align:right;white-space:nowrap;}
+.num.bud{color:var(--ofm-gold-d);}
+.num.spent{color:var(--ofm-crimson);}
+.num.bal-pos{color:var(--st-co);}
+.num.bal-neg{color:var(--ofm-crimson);}
+.num.bal-zero{color:var(--muted);}
+.minibar-wrap{display:flex;flex-direction:column;gap:3px;min-width:100px;}
+.minibar{height:5px;background:var(--ofm-cream-d);border-radius:99px;overflow:hidden;}
+.minibar-fill{height:100%;background:linear-gradient(90deg,var(--ofm-crimson),var(--ofm-gold));border-radius:99px;}
+.minibar-pct{font-size:10px;color:var(--muted);font-weight:700;text-align:right;}
+
+/* ───── MODAL ───── */
+.modal-bg{
+  position:fixed;inset:0;
+  background:rgba(31,22,17,.55);
+  backdrop-filter:blur(4px);
+  z-index:200;
+  display:none;
+  align-items:flex-start;justify-content:center;
+  padding:40px 20px;overflow-y:auto;
+}
+.modal-bg.open{display:flex;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal{
+  background:var(--surface);
+  border-radius:16px;max-width:900px;width:100%;
+  box-shadow:var(--shadow-lg);
+  border-top:5px solid var(--ofm-gold);
+  overflow:hidden;
+  animation:slideUp .25s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-head{
+  background:linear-gradient(135deg,var(--ofm-crimson-d) 0%, var(--ofm-crimson) 100%);
+  color:#fff;padding:22px 28px;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
+}
+.modal-head h2{
+  font-family:'Fraunces',serif;font-size:22px;font-weight:600;
+  letter-spacing:-.3px;line-height:1.25;
+}
+.modal-head .meta{font-size:12px;opacity:.85;margin-top:4px;font-weight:500;}
+.modal-close{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  color:#fff;width:34px;height:34px;border-radius:50%;
+  font-size:18px;font-weight:600;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.modal-close:hover{background:rgba(255,255,255,.25);transform:rotate(90deg);}
+.modal-body{padding:24px 28px 28px;}
+.modal-section{margin-bottom:22px;}
+.modal-section:last-child{margin-bottom:0;}
+.modal-section h3{
+  font-family:'Fraunces',serif;
+  font-size:14px;font-weight:700;
+  color:var(--ofm-crimson-d);
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:10px;padding-bottom:6px;
+  border-bottom:1.5px solid var(--ofm-gold);
+}
+.kv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 24px;}
+.kv-row{display:flex;flex-direction:column;gap:2px;}
+.kv-k{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+.kv-v{font-size:13.5px;font-weight:500;color:var(--text);word-break:break-word;}
+.kv-v.empty{color:var(--muted);font-style:italic;font-weight:400;}
+.modal-fin{
+  background:var(--ofm-cream);border-radius:10px;padding:14px 18px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+}
+.modal-fin-item{text-align:center;}
+.modal-fin-item .l{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:3px;}
+.modal-fin-item .v{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ofm-crimson-d);}
+.modal-fin-item .v.gold{color:var(--ofm-gold-d);}
+.modal-fin-item .v.green{color:var(--st-co);}
+
+/* ───── EMPTY ───── */
+.empty{
+  padding:60px 30px;text-align:center;color:var(--muted);
+}
+.empty-icon{font-size:42px;margin-bottom:12px;opacity:.4;}
+.empty h3{font-family:'Fraunces',serif;font-size:18px;color:var(--text-2);margin-bottom:6px;}
+
+/* ───── FOOTER ───── */
+footer{
+  max-width:1600px;margin:24px auto 0;padding:18px 32px;
+  text-align:center;color:var(--muted);font-size:11.5px;
+  border-top:1px solid var(--border);
+  letter-spacing:.4px;
+}
+footer b{color:var(--ofm-crimson);}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--ofm-cream);}
+::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:99px;border:2px solid var(--ofm-cream);}
+::-webkit-scrollbar-thumb:hover{background:var(--ofm-gold);}
+
+/* Responsive */
+@media (max-width:1200px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr);}
+  .charts-grid{grid-template-columns:1fr 1fr;}
+  .fin-strip{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:760px){
+  header{padding:14px 16px;}
+  .head-wrap{flex-direction:column;align-items:flex-start;gap:14px;}
+  .head-meta{align-items:flex-start;}
+  .filters{padding:12px 16px;top:auto;position:relative;}
+  main{padding:16px;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .charts-grid{grid-template-columns:1fr;}
+  .fin-strip{grid-template-columns:1fr;}
+  .modal-fin{grid-template-columns:repeat(2,1fr);}
+  .kv-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-wrap">
+    <div class="brand">
+      <div class="brand-logo">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAjIAAAIQCAYAAACbqIRkAACxfElEQVR4nOzddXxTVx8G8OfcpO7eUlqsxd1lOEMmMGPuxpztnTJjwtwHgzkb2xgbsuHu7lZK3d3baJvknvePtgypJE1u9Pf9fLrRNDnnJLm598m5557DOOcghBBCCHFEgq0bQAghhBDSVhRkCCGEEOKwKMgQQgghxGFRkCGEEEKIw6IgQwghhBCHRUGGEEIIIQ6LggwhhBBCHBYFGUIIIYQ4LAoyhBBCCHFYFGQIIYQQ4rAoyBBCJHdg8w6+evFSrqpR0JoohBCLoiBDCJFcTUUl/l7wI1Z+v8TWTSGEOBm5rRtACHF+JflFqKvTYe2vf0Imk/EbH74b3n6+zNbtIoQ4PuqRIYRIrignD1wUwUWOdUv+wsalK23dJEKIk6AgQwiRlEap4jUVVRd+19XV4d+ffsfJvYdovAwhxGwUZAghkqooKUN5ccklt2nVGvz0/hcoysmjMEMIMQsFGUKIpPIys1BVVn7JbZxzlOQXYsMfK2zUKkKIs6AgQwiR1IGN26HXG664nYsidq3eiPKiEuqVIYS0GQUZQohkclLT+eHte8BF8Yq/cc6hUaqwbP4PNmgZIcRZUJAhhEjm35+XwqDTN/t3zjmO7T6ArOQ06pUhhLQJBRlCiCRSz5zjZw4cBectZxS1Qon0hPNWahUhxNlQkCGESGLVD7+huryi1fsZ9HqknqUgQwhpGwoyhBCL27ZiDT+x50CrvTGNqEeGENJWFGQIIRZVmJ3LV/+8FIYmrlRq4TEStogQ4swoyBBCLOrvhT+jODffpMfo63TIz8imAb+EEJNRkCGEWMzvny/iBzZth9jE5dYt4eAozMmTqFWEEGdGQYYQYhEHt+zkm5etMumUUiPOgRITe3EIIQSgIEMIsYCspFT+++cLoVGp21yG3N3dgi0ihLgKCjKEELNUlpTxL16Yi5K8wjaXwRgQGBZiwVYRQlwFBRlCiFl++3whinLzjb7UumkMQS0EmYqSMhoITAhpEgUZQkib/frJAr533RYY9M0vQ2AMuZsc7TrENPv3zctWobSgiMIMIeQKFGQIIW2yfcVavvnPVWb2xNTr2C0ePv5+rLm/V5dX4qOnX0FJXgGFGULIJSjIEEJMlp+ZzZd8ugB1dXUWKS+ud/cW/y4aDMhJSaeVsgkhV6AgQwgxSUVJKf/o6VegVqrqr5s2k5u7O+L69mzxPtXllRC5iCM79mLPui3UK0MIuYCCDCHEJHvXbUGx2YN7/+Mb4IfeQwa2eJ+qigqAA1q1Bt/N/RC5aZkUZgghACjIEEJMUFVWwTcv+weiwbSZe5vDGMOkmTMQFB7a7PgYoL5HplFtbS2WfPoNVDVKCjOEEAoyhBDj/fT+FygtKLJIbwxjDMHhoZj+wJ0t3k+r1vCayqr/buDA2UNHcXjbbrPbQAhxfBRkCCFGyc/I5sd377fYKSW5mxumP3AXvLy9WuyNObR1F/S6Sy/vNugN+Pubn1BJ88sQ4vIoyBBCjJJ4/NQVgaKtGGMIiQzH6OuubvW+m/5cBX7ZIpScc1SUlGLDH8st0h5CiOOiIEMIMcr546chGkxfELIpfoEBePTNF+EfFNhib0xBdi4vyMxusheIc46DW3ahKDefemUIcWEUZAhxUVVlFSYFgJRTCRapVyaXY8ZDd6HviMEthhgASD19DnW1Tc9VwzlHSV4B9q7dbJF2EUIcEwUZQlxQ2tnz/MyhY0bfX1Wj4FVl5WbXyxhDz8H9MW7GNKPuf2DTDhgMzZ/OEkURW/5eDWV1DfXKEOKiKMgQ4oKWzf8epfnGr1ZdWlAMnZnjYxhjCAwLwRPvzkFAcFCrvTEJR07w0weOgIstZ5Saikqc3HfIrLYRQhwXBRlCXMzGpSv4mYPHoFIojH5MfkaW2bP4+vj54pHXn0dYu8hWQ4yiuob/8O5n0Ot0rZYriiKObNtjVtsIIY6LggwhLqQoJ49v/GMlOOcoKyox+nFVZeUwJ8bIZDJcf/8dGDpxTKshBgAObdmJopxco8rmnCMnLQMl+YV0eokQF0RBhhAXcmzXfhTl5IFzjuQTZ41+XGB4KIxKIE2Qy+UYO2Mabp51n1FFlBYU8XVL/oJBb/wVUmUFxSjMNi74EEKcCwUZQlxEVVkFX/PLnxAb5mSpKq9A4rFTRvViRLRvBzDTowxjDHF9e+KOpx8x6v4alYp/8cKbKMjKMakena4OGYnJJrePEOL4KMgQ4iLWLF6KqtL/rjwSRYPR0/yHRUWACaYFmcYlCJ5499VW11JqtPaXZUhLON/qAN/LcQ5kJaWZ9BhCiHOgIEOIC6goKeUn9h680BsDAFzkOL77AIpyWp9QLiAkmAWGhphUp7efLx589Tm06xhjVIhJOX2Ob1y60uQQAwDgHLlpGaY/jhDi8CjIEOICMhJTUFZYfMXtZQVFOLn3oFFldOnV3ej6BEHAqGkTMWzSWKNCTHFeAf/sf69DUVXdprWcOOcoKSgy+XGEEMdHQYYQF3Boyw7UaWuvuN1gMGDdb39Bo1K3mh7i+/QAM3KcTI9B/XD7Uw8bdV+NSs0Xf/gVKopLjbp/c5p6foQQ50dBhhAnp1Io+cGtuy85rdSIc46S/EL88+NvrZYT37cX5G7yVu/n4+eLu//3OPyNmPQOABZ/+BVO7D5g/qraFlqVmxDiWCjIEOLkzhw8ijqtttm/c5Fj69//4uyhYy0mgc49u6FD1y4t1sUEhkHjRiG+by+jQswfX37Ld63e2GTIMpVMLjO7DEKI46EgQ4iTO7HnIFqbzU5RVYM/v/4eyhpFs/f08vFmD7/xAtzc3Zr8O2MMnl5euOnRe41q1551m/m6JX9BFC2wojZjMHUwMiHEOVCQIcSJKatreHrCeaPum3o2EYve/AAqhbLZMBPXuwcbOGZkk5diM0HATY/ei/adO7baG7Nn7Wb+wzufQVdb12rIMgYDENYu0vyCCCEOh4IMIU6stLAYNZXGXQnERY7ju/Zjw+/LW7zfhJuug7u7xxW3h0SGYeTUia3Wk34uif/++SJo1epW72ssxhg6douzWHmEEMdBQYYQJ1ZTUQmtWmP0/Q16A9YsXootf//bbPIZNHYkGzt9KgTZf2NSGGPo0qs7Itq3a7E3JiclnX/98juoLCszf3DvRQSZDD2HDLBYeYQQx0FBhhAnplVroNfVGX1/zjk0KjV+/2whTu0/3GzSeHTui6xb/94XLsdmgoDB465qsWxFVTX/+cMvUZCV07ZJ71rgG+CPyNj2Fi2TEOIYKMgQ4sQ0ShX0Or3Jj1MrVVjyyQIUZOU0mzjunD0LPv5+AAB3D3f0Gzm0xTJXfb8EicdOW7QnplFkbDTCaYwMIS6JggwhTqymqrrNj81Nz8S7jzyHqvKKJpNHj0H92H0vPgWZTIa4Pj0RFBbS7GmlDX+s4Bt+Xw7RYIErlC4jCAIGXDUc3n6+bV2gmxDiwFqf3YoQ4rCMnYm3KVzkKC8uxV8LfsSsuS81eZ/xN17LKsvKuZu7e7PlpJ5J5GsWL7XIXDFN8Q8OxOjrJktSNiHE/lGPDCFOrLk5X4wlGgzYvnItEg4fb/Z80E2P3Msm3nRds2X8OO8zlBeXSnJKiTGG6+69DeHRUdQbQ4iLoiBDiBPz8vExq1cGAESDiK9efht56ZnNJpHmTuss/fJbnnE+BVyC3hjGGCJjozFySuuXfBNCnBcFGUKcmF9gANw9rpzzxVRV5RVY++tfJj0mJzWD71m3RZKeGKA+yFw98waEt2+5NybhyAlahIkQJ0ZBhhAn5h8UAA9vT7PL4SLH/k3bcWTHHqNDwY5V61BeVCLJYo6CIKDfqKGY/sAdrXY3bfh9OVb98BuFGUKcFAUZQpxYaFQkfPz9zD69BAC1ag0WzJmH0oKiVkNBekIS37p8tWTjYiJiovHgnGdbvW9ZYTHPy8jCht//RlZSKoUZQpwQBRlCnFhgaDDr1C3eImVxzqFVa7Bt5doW76dVq/nSr79DnbbWIvVezsvXB3c99xiiOsS0ms6yU9JQml+ImsoqbG+l3YQQx0RBhhAnN/r6yYAFemSA+jCzZ+1mqFpYJTsjMRlpZ89bvDeGMQYPL0/MevNFDL96nFFPaPvKddDr9RBFjh2r1rc4YJkQ4pgoyBDi5IaMH82iO8Va5PQS5xylBYVY/fMfzd7n5N5D0ChVZtd1McYY3D09cNtTD2PUNZOMeiJJJ8/w47sP1C+HwDlqa2ux+MOvLdouQojtUZAhxAVMvvXGSxZ5NAsHNvyxElnJaU32blj8SiXG4O7piUfeeAHT7299cG+jdb/+delMwpwjLeE8Us8kUq8MIU6EggwhLmDQ2BGIaN/OYuXVajQ4sn3PFbcf2LSdV5RYdvI7Dw8P3PHMIxg3Y5rRISbx2Cl+7ujJK9qhVqpw5tBRi7WNEGJ7FGQIcQERMdHsmrtnQmahXhnOORKPnoRGpbokKWz561/AQhmGMQZPby889vbLuO7e24wOMaoaJf/5gy+haGKdKS6KOLxtt2UaSAixCxRkCHERU++4ifUeNsgiY2WA+kG9pYXFF37PSk7j+ZnZFumNYQ2nk+6cPQujr5tsUoNXfLsYOanpzf49JyUduTTolxCnQUGGEBdy5+xHERwRZpEwo1VrsPWv1Rd+L87Nh6KqxuxywVDfE/PWS7jm7pkmNfTw9j185z/rIRqaXxJBNIjYs3az2c0khNgHCjKEOKHM8ylN9jh06d2DzXz8AbS0WrWxRFHErtUboFIoOQDkpWdBr9OZXa6nlxfuef4Jk3tiUs8m8kVvfgCVQtni/UQu4sCmHWa1kRBiPyjIEOJkzh4+ztf88mezf590y3R23X23QSaXm11XnbYWWUmpAIDM8ylmlcUYg7efLx5/dw4m33ajSSEmPzObf/vmh1BVK1o/tcWBmopKOr1EiJOgIEOIk1n1/a9ISziPipKyZg/U1959K3oPGwhBMG8XwDm/EGDMCTKMMXj5eOPeF57EqKkTTQoxlaVl/NeP5yMnNcPo8TkGgwGl+UVtaishxL5QkCHEiaQlnOcZiSkozs1HesL5Zu8XEBLEHn3zRfQc3N+s8TIcQE5qBnLTs3hFSWmby/Hx98Wjc1/CpFumm9SYotx8/tVLb+Pk3kMmDTIW9QaUFRW3fkdCiN2jIEOIEzl35CTUShVEg4jNf/3T4n0j2rdjT73/OuL69Gx7mOEcJXkFyDqfDFFsfoBtS7z9fPHAK8/iKiNn7G1UklfIv3xxLs4dO2XylVKiKKKsgIIMIc6AggwhTuTs4WPgDYHi3NGTSDp5psUjfGhUBHti3hx06tG1zaeZSgqKkJWSDlOvum48nfTw6//D2OlTTQoxKWfO8Y+eeQXpCUkXnq+pKkrb3oNECLEfFGQIcRIalZqnnf3vdJK+TodNf65q9XExXTqx5z9/F+3jOoEJpvXMcM6hqKxCXlomTEkyjWsn3fHsLIy5bopJlWYnp/EvX5iLnJT0Ns9Zw8GhUarb9FhCiH2hIEOIkzh94MglizVyzpFw+ESzayJdLCImmj3+ziuI6hBjcr21Gi1KC4tNChUyuQw3PXovrrnzFpNCzN51W/j7j7+AkvxC8ybe4/Xz4BBCHB8FGUKcxL71W68Yp1JdUYHfPv3GqMfH9+nJXl30Gdp1NG2lbFEUUZKbb3SwkMnlmPHgXbj50fuMrkSr1vBV3y/h81+dh4qSMqPb1nKZ1CNDiDOgIEOIk0g6ceaKMMFFjrOHj2H1z0uNShmRMe3Yk/NeRUT7dmAmjJnRarRG3Y8JDKOmTcR1995udNllRSX827kfYvminyEaDBZbkLKtg5MJIfaFggwhTqAoJ4/X1dY2+Tcucqz/7e9mZ/u9XLcBfdjrP3yB8Ogoi63LBACCICC+T0888+GbzC/Q36iC89Kz+Kt3Por9m3ZAV2f+rMEXc/PwsGh5hBDboCBDiBMoKyqBwWBo8m+cc1SUlGL+nHeReT7VyJ6ZaPbEu3MQEhlusTaGRUfh0TdfNPr+Zw8d458+9xoqS8rafGVSSzwoyBDiFCjIEOIEygqLYdA3HWQa5aZlYuEb76O8uNSoMNNryAD25o9fwS8wwOyeGTd3d8ya+yI6do83qqADG7fz9x9/AfkZlllN+woMcPekIEOIM6AgQ4gTqCgubXXMB+cc2Slp+HHeZ6ipqDIqHbTrGMPue+lpyOTyNocZD09P3P384+g7YohRBaz95U/+4/ufQ6/TSxNiADAw+AcFSlI2IcS6KMgQ4gQU1TVGzeMiGkQc27UP3771ETQqtVEpYdyMaezu/z1u0uDfRowxxPXtifE3XGvU/Vd+9yv//YtFqKmokizE1DcMCIkIk658QojVUJAhxAmoFUqj78tFjhN7DmLld78Y/Zjr7r2Njb5ussm9Mv7BgXjwldnw9vVp9YHrlvzF//nht1ZPkVmCIMgQTEGGEKdAQYYQJ6BWKmFK/4Vep8O6JX/h5/e/MPphtz7xIDy9vYyuQ+7mhrufexwdusW1GmLW/rKM//75Img11pmkTpAJCA6nIEOIM6AgQ4gTUCtVJi0RAAB6nR47/lmPVd8vMeqBEe3bscfefhluHu6t3pcxht5DB2Dw+Ktave/2lev4qh+WQK+z7OXVLZHL5Yjq0N5q9RFCpENBhhAnUKdteg6Z1mjVGixftBh/L/zZqDAzatokNnjcqFbHy8hkMtz53OPwCwxosTdmz9pN/Kf3P4eiqtqEVpuHMQb/4CBExERbbpIcQojNUJAhxAkIMlmbH6urq8OaxUux4Y8VRoWZaXfeAvdWemUm3ToDnXt0bTEoZCal8L8W/ARdbZ0JrTUfYwyjr5ts1ToJIdKhIEOIE5DJ2x5kgPqemT+/+s6oMNNzcH/WrX+fpntlGENgaAiuvmV6i2VUlZbzL56fa/7ij23g5uGOSTdfZ9U6CSHSoSBDiBOQy+Vml6FVa7Ds6++xa/WGVpPFvS88CS9v7ytuZwzoM3xQiwN81Qol//nDr1CUk2f1EAMAvYYOREhkBJ1WIsRJUJAhxAnI5HLAzEMz5xwalRqLP/gK6eeSWkwYHbvHs/5XDbvidoEJuO7e21qsZ8MfK3Bs516bLNooyGQYOHqE1eslhEiHggwhTsDb1wdmJxnUhxm1UoWvXnoLxXkFLYaZAVcNqw9QDZggYOS0SejSq3uzDdm/YRv/e+HPqLPyuJhG/sGB6D1soE3qJoRIg4IMIU4gJCLMAjGmHuccRbkFWLN4aYv369q/D3z8fC/87u7ujim339Ds/Yty8/lf3/wkyQKQxmCMYfyMa9C+c0c6rUSIE6EgQ4gTCAoLBRMsd3wWDQbsWLUee9dvbbZXJrpTLOvcs1v9wBgAUR1jENE+utky//3pDxRm59pkXAxjDKFREbjhobusXjchRFoUZAhxAoGhwRAE865cupyurg6/fPgVspPTmk0ewyaNAUN9UOjYLQ5BYSFNpqld/27gu1dvtEmIAepnGZ5+/x3w8fej3hhCnAwFGUKcQFBYqFlzyTRHUVWNLX/92+zf+181HIJMgCAIaGrwLwCU5Bfy1YuXQqezzbgYxhhi4zvjqmuvtkn9hBBpUZAhxAlEd+oAuZv5l2BfjnOOveu3ICs5tcmulLB2kSwypj28/XzRb+TQJstY++tfKMjKhUmLQVlQcHgoHn93TquzDBNCHBMFGUKcgF9QAOs+oK/Jq1O3pvEqpgWvvgeNSt1kFInr0wMjpoxvMigkn0rgm5etgkGvt2i7jOXp7YW7/vc4OhqxcCUhxDFRkCHESYydMRVCK2sgtVVeWibOHDza5N+69OqOQeNGXXG7qkbBly/82XZXKQkCJt58PYZOGGOT+gkh1kFBhhAnMeCq4fD285GkbL3BgINbdjb5t049uiK+T88rbk86dRZJJ87YZICv3M0NV02bhAdemc08vb2oN4YQJ0ZBhhAn4eXjzfoMHyxN4Zzj1L7DKMzOuyKVxMR1gn9Q4BVh4d8ff4dWo5GmPS2QyWQYf+O1eGDObKvXTQixPgoyhDiRIRPGwM295ZWp20qtUOKvBT9ecbtvgP8VIebAph085XSCJO1oiZu7O6beeTNmzX2RNRWuCCHOh4IMIU6k99ABCAoPlaRsURRxdMcelBUWt3iuSKNU8Y1LV8BgMEjSjubI3d0w46G7cNuTD1m1XkKIbVGQIcSJBIWFsml33mLRWX4vptPpcfrAkRbvk5ZwHjmpGVa73Lpx1t4Xv3wftz/1MPP286WeGEJcCAUZQpzM1TOno0vP7ha/FBuovxz7zMFjLd5nz7ot0ChVFq/7Cgxwc3fDyKkT8cqCjzBo7EgKMIS4IAoyhDgZT28vds09M6UZK8M5zp84DVWNosn+FmW1gh/YtB0il/aSayYweHh64cZH7sVzn77NOnaPpxBDiIuiIEOIExo8dhT6DB8syQR5FcWlSDl9rsm/b1uxGnXaWklPKzHGENe7B176+gPc+sSDFGAIcXEUZAhxQt5+vuyZj95EWLtIScrfu37rFbepFEq+e/UmSeoD6gOMu4c7rrv3Nnzw5w+s38ghFGIIIRRkCHFWPn6+7L6XnoaPn6/Fyz657yCUl51eyk5OQ0VpmcUnwGOMwc3DHYPGjsTLCz7GfS89TQGGEHKB5VeZI4TYjWGTxrK8jCz+94KfIIqixUKGWqFCVlIqeg8deOG2zMRkqBQKi5TfSBAECDIBD855DlfPnE4BhhByBQoyhDi5mx+9j8nd3PiKb3+x2NVEosGA1DPnLgkyZ4+csOjYGLmbHGOnT8MND92FqA4xFGIIIU2iIEOIC5jxwJ1MEGT8988XWmQlas45ctMyL/yuUal54rFTZpcL1F+RFNYuCs998jbi+/akAEMIaREFGUJcxPX33cbc3N348kU/o6aiyuzTTGWFxdAoVdzL14cd330AtWrz1lVijMHbzxfDrx5HvTCEEKNRkCHEhUy94ybWqUdX/tn/XkdlaTm42Pb5XsoKi1FXWwsvXx8c3rYbohllMYHB29cHz3z4BgaNHUUBhhBiNLpqiRAX061/b/bOr99g6MTREIS27wKqyipQU1UNAMhKSm1zD48gk2Hg6BH4ePliCjGEEJNRjwwhLigyJpo9Oe81vn3AOvz9zU/QqtUmBxG9Xo+0M4mQu7lxbVtOKzEGgTFMu/NmzHz8gSZX0SaEkNZQkCHERXn7+rDr77sN0Z1i+Ipvf0FGYjL0OhMGAnOOc8dOISw6CnVarUl1M8bg4eWJWx57ADc8dBcFGEJIm9GpJUJc3MAxI9lLX3+IKXfcBEEmM3pZA845Uk4noKywGLXaWpPqZIKAmx69j0IMIcRsFGQIIQgMDWYPvDybPfvxW4iIiTYqzHDOUZSTj4LMbIgGg9F1yd3ccN29t+KmR+6hEEMIMRsFGULIBSOnTmCvLPgIvYYOhCCTtXp/LopIPZNo9PgaxhiGThqDmx69z9ymEkIIAIBZel0UQojj06jUfNn877H179Woq61r8b7efr5QK5StlskEhk49uuGtn7+Gt68P9cYQQiyCemQIIVfw8vFmD7zyLLv/ldlw9/AAWogdxoQYAPD198ddz86iEEMIsSgKMoSQZk2+9QZ2x+xH68OMGQRBwIgp49Fv5FAKMYQQi6IgQwhp0fX33c5mzX0R3r4+bS4jODwUtz7xkAVbRQgh9SjIEEJaNXb6NHbN3TONGgB8OUEQMPn2GxEYGky9MYQQi6MgQwgxytQ7b0aXnt1MexADgiPCMHjcVdI0ihDi8ijIEEKMEhgSzF78+n0EhoYYPWkeA0PH7vGIje9MvTGEEElQkCGEGC04PIxNveMmCDIjdx2Mof+oYdI2ihDi0ijIEEJMMvq6yfDx9zOqV0YQGPqNGGKFVhFCXBUFGUKISSLat2NX3zKj1SDDGENkbHtEdYyh00qEEMlQkCGEmGz6A3fA08e75TsxoHOPrtZpECHEZVGQIYSYzMffj/UeOrDF+zAweJkx9wwhhBiDggwhpE16Dx0IQWh5F+LlQ0GGECItCjKEkDbp3LMbPL29WryPTG76BHqEEGIKCjKEkDaJ7doF3r6+Ld5HUVltpdYQQlwVBRlCSJt4+/qwkVMnNHv1Eucc5cUlVm4VIcTVUJAhhLTZhJuvA5q5uJoDyDyfYtX2EEKsr7SgiKeeTeRpCed5eVEJt3b9cmtXSAhxHu07d2SxcZ15TmoGOL9s/8U5qssrkZ+ZzaM7daC5ZAhxcFq1hqeeTUTisVPISExGXnoWygqLYdDrL7mfTCbjkbHtERPXCV16dUevIQPQtX9vyfYBFGQIIWbpO3IIctMyrwwyqO+VObHnIKI7dbB+wwghFnNoy06+5LNvUF1eCV2dDlwUAaDJz73BYEBBVg4KsnNwdOdeuLm7o13HDnzWWy+iS6/uFg80rKlGEEKIsY5s38O/evlt1Gq0V/yNMYZeQwbg5QUfwcvHm3plCHEwCUeO8zWLlyHh8LH6ANPGzMAYg0wux1XXTML1992ODt3iLLY/oDEyhBCzdOvfB36BgU2OleHgKMjKRUl+gdXbRQgxz7aVa/lnz72Bk3sPoq62rs0hBqjvudHrdNi9djPeevAZHNu132K9KBRkCCFmCQgJYhNuvAYCa2J3woHK0jKc3HvY+g0jhLSJVq3hq75fwn945xMoqqrNCjCX46IIRXUNFrw6DztWrbNIwRRkCCFmu+bumfAPDmryb5xzrP/tLyira+g8NiEOYOe/G7Dyu19h0BukqYBzKKtr8PMHX2LX6o1m7xcoyBBCzOYb4M/GXD+l2TllqssrseqH36zcKkKIqdISkvjf3/yEWu2VY96awhiDu4cH2nfphC69uiE4PLTVpUsa1Wq0+GvBj0hLOG9WmKHBvoRITKNSc71OB7/AAKce7Jp47BT/+Jk5UFbXNPn3gJBgvDz/Q3Tt18upXwdCHJWyuoa/89BsZCalGnU6iTGGsHZRePj159ChWzzkchmUNQqs/+1vbP17tdFldOrRFR8v/7nN+wXqkSFEAhqlmqcnJPFNf67kr939GFLPJNq6SZLr1KMruvbr1WyvTE1FJVZ8u9jKrSKEGOv0gaPIz8oxbkwMY2jXKRYvzf8AA8eMZCERYSwgJJhFd+rAHn3zRXbVNVeDGdEzwzlHbloG9m3Y1uZeFZpHhhALyjyfwveu34ozB4+iqrQciqpqMIFZdLCcvfLy8WYPznmWv3zqYagVyiueM+ccp/cfwd8Lf+a3PvEg9coQYmeObN+Nuto6o+4rEwTMmvsiOjZzGfX0B+7Egc07YGiYb6YpgiAgvH0U7nz2MfQdMaRtjQYFGUJMolaqeK1GA61aA7VCheqKSuSkpiPjfAoyE5NRml8EURQhXvThlTHXWQE6MrY9u+Ghu/jf3/wEXZ3uir8bDAas/+1vxMZ15sMnj6MwQ4id0KrV/MSeg+C8+eDRiAkChkwcg56DBzT7Ge7UI54NHn8VP7J9N7h40ZcaxiAwhuCIMAyfPA4zHrgTQWGhZu0LKMgQl6FRqfn63/6GIAhw9/KAh6cnPL284OHlAXdPTwiCDLVaLbTq+qDSGFi0ajUU1TUoLyyBWqmqv12jhUapgrJGAdEg0ch+BzV2+jTsWbsZuelZQBM9UaoaBRZ/9BXCoiO5FLN8EkJMl5aQBK1aUz8ddyvkcjlGTp3Q6v2uvnUGju3cC4NYv49kjMHNwx1jrpuCa++ZiZi4zhb5/FOQIS7Dy8ebRcRE85/mfQa1UgWOZtc7vOyzzJv8cLvC6aK2CA4PZTMff4AvevNDaFTqJu9TUVyKz557HS9+9T7v1KMrhZkWFOfm84iYaHqNiKTOHz9t9H19/P0Q0T661ft1798bvv7+qK6ohLunBzr1iMdtTz6MviOGWHR7piBDXMroa69mcrmMf/P6+9CqNcZ8+SBtMHLqRJaXkc3r56LQX/F3zjnKCovx5Ytv4cn3X+Nd+9KVTBdTVtfw0wePYveaTZDL5Hhp/ge2bhJxcvkZ2Ubf18PLE74Bfq3ez9Pbm0V1jOHe/r64/cmH0f+qYfDx97P4Z52CDHE5I6ZMYDmpGfyfH36DvomDLLGMqbffhKQTp3H28PFLz5E3EEUR+ZnZeP+xF/DMR2/ygaNHuGyYUVbXcFWNAgXZeTi8dReO7twLZVUNOOfo1r+PrZtHXEBTa6U1RyYTIHczLj7cPOs+DLhquKSfbQoyxCVNu+sWpJ9Lxsm9B+kUkUT8gwPZI2+8wD999jXkpGY0+zorq2uw6I0PMemW6/mMB++Cp7eX0weaiuJSnp2SjqykVGQlp6KipAwVxaUoKyq5pAeruUvZCbE0mZuJFyUYuduUOsQAFGSIi/IPCmTPfjKXP3/jfSgrLKYwI5GoDjFs9sdv8c/+9zoKMpufn6KqrBwrv1+CjPMpeOjV53h4dJTdHcFP7j/Mayoq4e7hCS9vT3h4ecHDyxMymQxMEMA5h0GvR61GC41KDY1KDa1aDbVShbLCYhTnFaA4rwCleQWoq9OhcewVBwDOL/yfEFuIjGl9zEujutq6Zse/2QIFGeKyvH192fX338F/+/Qb6OqMmzuBmC42vjN74p05/Os576Ikr6DJMMM5BzcYcGL3AeSnZ2HsjGn8mrtukeR8elu1i43Bqu9+ReqZxIZLVOubJpPLIJPJIBpEGAz6/57fhTHiDYGl4XYKzcQederR1ej7qpUqVJVXoH2XjtI1yAQ0sy9xaYPHjYJ/cKCtm+H0ug3ow16e/yE6dI1rcR0WzjmKcvOxfNHPeObaO7Bvw1ZeU1FlF0f+iJh27PnP5yG6U2x9aNHrYdDrUaethUalRq1WC71OD4PeUP9jMEA0GCAa6ucV4pxTiCF2q8fAfpDJjevb0KrUSDx6UuIWGY+CDHFp4dFRrOfg/jQWwQpi4zuzF76chxFTxkMmb/l8vGgQUV1RiQWvzsO8x/6HXz76mp8/ftrmKSAwNJjNeutlBIeHAbTNECcSHBHGug3oY9S+kHOO3Ws2QVFVbfPPJEBBhhCMmjYJgow+CtYQGduePffpO+yau2bC29en1fvrdXpkJqZgw+/L8dYDT2P2dXfw3z9fxM8ePs4rSkq5srqGa9Vqq+5Mu/brxW5/5hG4ublZs1pCJDds0thWv2QA9UGmJL8Q37z+PtRKlc3DDK1+TVxeTUUVf2LKLfWzWkpAJpfhpa8/xKCxI+kr/EXOHj7O1/26DCf3HQZvOPXSGsZY/Y8gwC/QH8HhYfAL8MdTH7yBoLAQq76+v36ygK//7W9JZ3ZmjKH7gL5497eFtO0QyZUVFfO3HnwGxTn5Rn0e3T08MHjcKEy5/Ub0GjrQZtsoDfYlLs8/OJCFRobzPBMmhCLm6zNsEOszbBC2LF/Nly/8GYrKKhj0hhZ3oBfGmYgiqsoqUFVWAbmbG+q0xs+BYSmTb70BR3fsRVFOntXrJkQKoZER7NbHH+QLXnsP3IiAXldbi4NbduLw9t3w8PTk7p6eJtfJBIbxN1yDO2fPanMQoiBDCADfwABbN8FlTZ45gw0aM4Kf2HMQBzbtQMLh4w4xKDaqQ3vWb+RQXpxr3LdXQuzd0R17edKJM3D3cDe6h7p+2gED1EoV1EqVyXUKggC1Qmny4y5GQYYQAH4UZGwqJCKcXT1zBq6eOQOZ51P5vz//juO79kOv07XaS2NLY6dPxfYVa2iGaOLQzhw6xhe98QEqikshcu5w8xlRkCEEFGTsSace8ey5T95GdUUlT084j9QzichOSUdZYRHKCkugVigv7Gw5eMNVFrY5Pd+1Xy8WGhXBi3LzbVI/IebIPJ/CNy5dgYNbdkGrUtvtF4bWUJAhBDDqChpiXQHBQWzgmJEYOGbkhds0KjUvKyxG6ulzyExKQVV5BVQ1Crh52O4Kom4D+oCCDHE0+RnZ/L1Zz6O6otJhA0wjCjKEoH7AGbF/Xj7eLCauE2LiOtm6KRd07BaH3bZuBCEmOLxtN1/05odQVtfYuikWQUGGENDifKTtgsJCbd0EQox29vAxvvD1D6BWmjfAtk3Yf//475/M7MklKcgQAoAxmhCPtE1ASJCtm0CIUQ5t3cXnz5mHOq3W6NNJMrkc0Z07wD8oEDKZDDK5DIKsfn0xmazh3xfd1vh747/rh7A1zP8EBrCL5oMCwAQB8X16mvW8KMgQApptnrSdt68P5HI5XblE7J6Hpyd8A/1RWVIHtDIJJWMMvoH+ePi1/6Hv8CGQu7uBMQZPby+721tSkCEEgK2ueiGOTyaXQ+7uRkGG2L0Bo4ez77atwvaV6/je9VuQcioBdbW1Td43ICQIT3/wBvqNHGr3O0cKMoQQYg7G6NQkcSgTb76ODZ88jmecS8IfX3yLzKQUGAzihflj3NzdcP/LzzhEiAEoyBACgAb7krZrGAJAiEPx8fNlfYYPxod//YiDm3fwnf9uRMrpBKiVKvS/ajgGjB5h6yYajYIMIYSYwwJXXRBiSyOmTGADRo/g2clp+PfnPzDjwbvg4+frMBs1BRlCABoiQ8xCmw9xdJ7eXqzbgD54ef6Htm6KyejELiGEEEIcFgUZQkBjZAghxFFRkCGEEEKIw6IxMoQAoFEOhBAiveK8Ap547CSqy6tww0N3WWTHS0GGEFCMIYQQqVSXV/Ij2/fg2O79KMzKRWlBEcZOn2Kx8inIEAJQkiHEQVSVVXCtWg2dTgeDTg9dXR1UCiVqKqqgqlFA7u4OT2+v+h8vT7h7ekIul8PdywNe3t7w9PaGb4AffeIlUllaztVKJRRV1chKSsPZQ8dwcu8h6PV68IZlEQRBgJFLPRmFggwhhBC7lZGYzLOS05CdnIbC7DxUl1egprIKtVot6rS1qKuthWgQmy+AMchkMvj4+8I/KLD+JziQR8XGoH1cR8T36Yl2HWNdNthkp6Rz3wB/uHu4wy8woMXXQaVQ8jqtFlqNFmqFEpUlZSgvLkV5cQkqiktRXVGJqvIKVJXWv0cGKy3bQUGGEIAmNCPEDmjVal5dUYWc1AzsW7cFx3bvh65OB3AODuDir/HGrt4MzmHQ61FTUQVFZTXykV2/AnNDN6wgE9Cxe1c++tqr0XvYIASFhcA/KNBldgjHdu7FmsV/QqPWgAGcCQI8vTzh4e0FN3c31Gq00Ko1qKutvbIX5eL346LfOXjDDdZBQYYQ0JklQmwp5cw5fmznPqQnJKEgKwcVxaUQOQcXW+hpaYML4Yc3HGwBiKKI9ITzyEhMhrevD6I6xKBD18588PjRGDxulNPvGm6edT8TZDK+fOHi+gUkDQYodTooaxT1X/AseQ5IIhRkCAGoR4YQK1NU1fDctAys/H4Jzh05DoPBAC7a5qDJOQc3GKCsrkHqmXNIO5uInf9uRLf+vfmds2chJq4TfPydd1zNjQ/fw3JSM/j+jdshGgz//cEBQgxAQYYQANQjQ4i1FOXm830btuLE7oPISEyCXmedcRSm4A2noxKPncLc+59C1/69MXLKBD5y2kQEBAc55e7ikTdegKpGiZP7Dlm8J0xqFGQIIcRsTnlssyhFdQ3fvmItVv2wBFqVur4XxAG+8RsMBiSdOIPkU2fx70+/496Xnuajpk50ujfc29eH3f2/x3lWUgoqSsps3RyT0My+hBBiBnbhP6QpGpWar/99OX/7wWew9KtvoVGqIDZchusoOOcQDSIqSsrw9cvv4ONn5vDUM+cc5wkYKTa+M5v+wJ2QyWS2bopJKMgQAlpriRAppCWc53PufAS/fjwfWUmpEA2OFWAu13jK6cj2PXjj3ifx70+/c41K7bhPqAnX3Xsb69ijq62bYRI6tUQIIcSiCrNy+epf/sSBjduhVipt3RxJ6HU6/Pn1Dzh76DjufHYW79Kru9N8Gxo5dQIyziU5TOikHhlCANC5AUIs48yhY/zN+5/EjpVrnTbENDLo9Thz6Cjef/wFnD103DGO+kbo2rcXfPx9bd0Mo1GQIQSgHEOImYpy8vi3cz/iHzz+IqrKKiA62JUvbcVFjurySnw8ew5Wfb/EKU41hUSEwdvX12GmpaBTS4TAYT6vhNilw9t28/lz5qFWo3GY0xGWplGq8PfCn6BVa3Dns7Ns3RyzhLdvx7z9fDiDVSfobTMKMoQAoC4Z0mYuvOkUZObw1YuXYt+GrajVaG3dHJvT6/T458ffoKiq4nfMnuXQSx0EhAQDSLd1M4xCQYYQQojJMhKT+afPvY6ygiKILtoL0xTOOXasWg9BkOGRN1+wdXPaLDgs1NZNMBoFGULw3wJyhJCWqZUqvmnpSqz8/lfqhWmGwWDAthVrIHd347c++RB8/HwdbgcTGBZi6yYYjYIMIYBLnx4gxFgVxaX8ixfmIi0hsX5VatIsg8GALX/9g6CwUNzw0F22bo7JAkMcJ8jQVUuEEJsryS/k6eeS6PyEHTu2ax9/55FnkXTyDIUYI+nqdPj7m5+wb8NWh9u25W6O08/hOC0lRErUI2MTOakZfNe/G3Bo6y4MmTAaXXp1t3WTSBN+/2IR37LsH2ga1kgixqurq8OvH89HaFQE7z6gr8PsaQTBYZpKQYYQgMbIWINGqeKVZeUozS9CyplzOLn3ELKSU6Gv0wEMMOgNtm4iuUxxXgFf8e0v2LtuC/Q66oVpE85RVVaBPz7/Fi9+/T53lCuZGHOcEzYUZAgBqEdGAiqFkhdkZiPldAKSTiYgLz0LGpUKymrFFfONCILj7DRdRX5GNp//6rtIT3CcqertFeccyafP4pePv8YzH7xp6+YYxZHWn6MgQwgASjL/2bZiDa8sKYebhxs8vDzh7uEBD09PyN3dIAgC9Ho96jRa1GprodVoUavRoE6jhUqpREVJGSqKS1BeVApldQ04+CUzal3+O7FPR3fu5T+++zkqSkopxFiIaBBxdPteHNy8g4+YMoF2OBZEQYYQcolu/fvggydeRHnxfwcxBgCMgTEGzkVckkcuOtA13p8Ofo5r9c9L+T8//gZVjYLeRwvTqjVYtuBHDBg9gnt6e1GYsRDqzyUE1B9zsZi4TuzVRZ8ion0UuChCNBhgMBhg0Ouh1+lg0Nf/Ljb+iOKFH845HfwcVFVZBf/+3U/5H19+a98hpiFQC4IAQSaDTCaDTH7Rj0wGQSaDIAh2d3qEc46CzBws/eo7WzfFqVCPDCEAJZnLtO/Skd0xexb/8oW5MBhoEK6zqyqr4PNffRcJh49DtLP3uzGMMMYAVj+/SUx8J8TGd0FsfGcEhgaDgYGDg3OAiyLKi0uQkZiMjIQk5KZnwaDX201vIeccu1dvxLBJY3mvIQNoz2MBdh9kslPSeWF2LoZfPY7ecBeSn5HNC7Jy0Gf4YFijC5auWrrSiMnjWdHTefyvhT/VX1lEmsEcetHR7JR0vuDVechKSrX5Qf5ynt5eCIkMR7uOsRg+eRz6jRiKwNBgk15tjUrNM5NScHDTTpw7ehLFufmo1dp2RmKVUoUtf/2LXkMG2LQdLXKgbdoug0xZYTE/tms/Tu49hOyUNHToFofhV4+zdbOIxCpLy/nJvYdwfM8BZCQmIzQyHN0H9oOnt5f0lTvQh9aabnzkHpZ8OoEf330AXBRt3RxiYYnHTvLv3voEhdm5dhNiBJkMIRFhmHDTdeg5uD/Co6MQ1i6yzZ9QLx9v1nNQf/Qc1B8VxaU8KzkNO1atw9Gd+yAaDLZ53pzj2K59SDh6gvceMtBO9z522qwm2DzIKKtruFqhhEqpQl56Jg5s3I6EIydQq9WCi/UbWExcZxu3kliaqkbB1UoV1AolCrJzcWjLTpzafwQalRqiKAKcIzgsBNa7xMVxPrTWNvX2m3By70EYKMc4laM79vJv536E6sqqSwZs2wITBHj5eCMyNhrjZ1yDaXfdIskHMjgijAVHhGHgmBE4feAIX75wMTLOJ0NXW2f1QFOnrcUvH36NT1f+YtV6nZHVgoxWreYVJWUoLy5FeVEJygqLkZuWgYriMlSWlaO6vAJateaKjcneBmsR0xXl5PHy4lJUFJeirKgYuWmZKCsqQVVpOarKK6BWqmy/I6XNrFn9rxrGOnaL5xmJyXbzrZ2YZ+0vy/i/P/+B6opKm7aDMQZBJsPIKeMxZvpUxPftCV9/f6t8GvuNHMo69ejKzxw8iuULF6MgK8eq23f9wN9sHN62mw+bNJb2QGYwKcisW/IX37t+CwRBgKe3Nzy9POHh7QVPLy+4e3pAV1sHrVoNjarhR62GVqmGWqWGoqq6YSP577rNi+eUoB2k/dr05yq+698NYAKDh5cnPL284OntXT/HiKcH9Do9tGp1/XuvrH/fNSo11EoVFBVVDW/xxe87LgQXu3nfaTfSohsfvgdfvPAmDfx1Aiu++5Wv+u5X6OrqbNoOdw93dOwej7ueexy2GvTqHxTIrrrmavQc1J8vmvshEo+esur4GZ1Oh91rNmHYpLFWq9MZmRRkJt58PRSV1Vj98x//7dDYpcMkLz5IXbjNXg5WpE2m3nETM+j1/M+vf0CtVlP/Jjvd+05JpiV9RgyGj78vaiqrbd0U0kbVFZX8j88XYd/GbdDVWf9USiNBJkNsfGdMv/8O9L9qGOxhyv7giDD2/Gfv8t1rN+P3zxdCo1JbpV4ucpw5eBRFOfk8Mjba5q+DozJpHhkvH292x+xH2YSbr4MgE+rnjLhoDglRFMEvmkuC5pRwHtfecyubcNO1kMlkTvm+0x6kZT5+viwipr2tm2HH7HsLUlbX8J/e/wK71mxEnbbWJp9Pxhh8A/xww4N3Yt5vizDm+inMHkJMI08fbzbl9hvZ699/juDwMKsNa9CqNVjx7WKr1OWs2jQh3q1PPIQeA/vR+BUX8+CcZ9nIqROt+L4zWO8AQdtya0IiwmzdBNIGhdm5/JPZr+Lgph0QbTRiWxAE9BzcHy988T7ufPYxZs+z2nbr34fN/ngugiOsF2YObd2FvPRMu/r250iH9zYFmcDQYDbrrZfgG+BHYcbF3PbkQ4jqGON077uTPR1J+Pj52roJxEQ1lVX861feReLx0zbrJfXy8cY1d8/EnIWfoPcwe73U+FK9hgxg7y/9DqHtIqxSX522Fif2HrJKXc6ozUsURHWIYQ/OeRZuHu6WbA+xcxEx0eze55+EIJPZuinEyrwoyDiU1DOJ/J2Hn0Xa2USbzAHEBAFdenXHc5++g/tffsaue2GaEhIRzh6a8xw8vKSfx0oURZw7elLyepyVWWstDRg9AnG9e1qqLcRBDB5/FRs6cTSY4FD7JWImLx8rTExILKKsqITPn/MuspPTrN8TwxjkbnL0GNgHry76FAPHjHDYHcXg8Vexp99/DXI3ueTdtkknzkBRXWNXp5cchVlBxjfAnw0YPQxMoLUnXc3oayfD3cPT1s2wHDq31CoPT0+nO6XojM4eOs5fv/sxFGRbd16URjKZgBkP3YVXF32GgJAgh99ghk8ezybdMh2CxMc5jUqNnavWS1qHszL7nRl+9XjI6DSDy+nUoyuCwkJs3QyLoQN066TekRPz5aRm8C9fmovyohLrTYrdgDEGb19fvDz/I9zx9KMOdyqpJTc9ci98/aUdE8pFEWt+WSpZ+c7M7D1TVIf2LCKmnSXaQhxIWLtIFhgaTBf7uBIKe3btwKYd/K0HnkZ1eaXVe2IEQUBMXCc8/8W7Dn0qqTnBEWHs2U/ehqe3t2R1cM6hqKpB6plEuzi95Ehf7izyFcuuV/AkkunUoyutGu1CHGnH5mpOHzjCv537EWoqq6xed+Ol1fN+/xb9Rg512o2k74jBbPjkcdL2ynCOlDPnJCvfWVkkyLTrGGuJYoiDiYyJdpoBv87xLKRFr5F92rp8Nf/o6VegViqtXrebhzsm33YDZn/8Frx9fZx+E5lw47Xw8pG2VyY9IUmy8p2VRYJMUFioJYohDiYwNNh5emSot4E4oG0r1vBfPvwKulrrrpvEGIObhzvufeEpPPz68ywoLMQlPkA9BvVjA8eMlK5XhnNkJadCo1LbxeklR2GhIOM8gz6J8QJCgikAEGIjq75fwn+c9xlqrbzkABMERHfqgNkfzcW0O292uR3AzCcegKe3lyRdlJxzFGbl2HxVckdjkSATEBJM589dUEBIEOUYQmxg2fwf+Ypvf4Fep7dqvUwQEBkTjf998S6GXz3OJT/90Z06sAGjh4Mxaa7i09XpkHD4uCRlm8SB3l2LvBMymYxmenVBnl5ecKitvQUUxI1Ar5HNqZUq/usn8/mq739FXW2tVeuWu7lh1LSJeO+P7xAb19mlN4YRk8fDXcJZ7U/tOyxZ2cZznLdYbpFSGB0IXJFTvefO9FyI01ryyQLsXrMJopWXHJDJ5bjp0Xtx/X23w8vH2+U/LF1694CPnx9qNVpJyj9rDz0yDsQyQQZ0HHBFUl+xxBhtV4RwzlFVVs7/+PK7+hBjMFitbsYY/IODcMczj2DSLdPp09ggPDqKdewezytLyyQZn1Sr0SArKZV37B5Pr7kRLHJqiQF0xHFBUp0jJnaKPuM2oaurw3dvf4K967ZYPcQEhYfixa/eoxDThEm3XA9BJs0+UBQ5ctIyJCnbGVmuR8ZSBRFiA5Juv/zCfwgxCecc6eeSkJGYbN0rkxhDfN+eeOTNF9GJegWaNHTiGBYcFspLC4stXjYXRRTl5Fu8XGdlwThJ27qrcaYxMlIfJHR1OknLtwbnebcdjzVDjCAIGDl1Ap7/Yh6FmFb0GTFYknI55/XrZRGjWKhHhtFejjg0g8Rd9nVa615h4mg4AIPeMcOes4zlapzkbsx1U3HXc4/BL9DfCZ6VtDp0iwdjTJKgWVVWYfEynZXFrloirsep3nYJv/FywOqXykpC4vNvWomuACGtY4zBy8cbtz/9KK65+xan+mhLKaJ9FNzc3VAnwczKVWXlUNYouK+/H70frbDYGBknO6wRYzjRWy53l25OCHCOqtJy6cq3JgZphvtwSHYpK2ldcHgobn/mUYy/4Ron+lRLLygsFF6+PpIEmcqycujrrLv0hKOiwb6k7ZyhP72Bm7ubZGVzAEW5eZKVbz3Svt9alVrS8smVGGOIieuER958ET0G9nWeD7SVBIWFwMvHBzUVVRY/vaSoqkYtnZI2iuUG+9JHgDgwd3cP6QrnHIXZzhBkpMPBUVFSZutmuBS5mxxxfXrgxa/epxDTRsHhYSwgJFCSskWDiEr6TBjFQSYCoUtXibTk7nIwQZqPA+cchTmOH2SkvkSdFsqznvorkybipa8/RFSHGAoxZujap5c0BXOO4rwCaco2giNtFBac2Ve6py0arDsdNzGOqLfe5FxS8/D0hNxNDp0E57oBQFWjhFqp4t6+Po60f7Aq0WBAVVkFDwwNdsDXyHGa7OHliSm334R7X3jScRptxzr17CZJuZxzlOQVSlK2s7HczL4ScoorPpxQrVYLZ+kt8/LxhpvEA35L8h18p8QYpPy0i6IIZXWNZOW7OsYYPLw8cf/Lz1CIsaDgiDBJPhYcsGmPjCNxiFNLlc5yxYeTKSsqkfKqZavy9PGWeMAvR+rpBMnKdwaiyCnISIQJDCFR4Xjt289w9cwZFGIsKCg8FNIkGY6SfAoyxrD7IMM5R0VJqa2bQZpQml8o8Yyj1tvfevn41PfISHSKlHMg5UyiJGU7C9FgQGUpDW60OAZ07BaP5z55Bz0H96cQY2HBoSGSlU2fB+NYJsgwJukYGV2dDqUFRU7y3d95lOQXSjqRnDWHHfgFBsDTy0u6KjlHblomFFXVtB03w6DXIzuFFsqzJEEQMGDUMLz9ywJ069+bQowEvHx9mLevj8XL5ZxDUUU9lMawWI+MVFd8AAA4R0ZiknTlkzbJTk6TtEeGSRyQL+YX6M+CI8IkK59zjoLMbIe+nLL+nZBwBmT6nFuUu4cHpt5xM56Y9ypokLm0AoKDJNlX2XRuJQeaJ8wi6UOQCXD3kHCgJIBjuw5IWj4xTXV5JS/MyZM0yLh5uEOQyyQr/3KdJbr6oJFaqcK2lWslrUNKeRnZko7t5gDSzzlikLGzHT5jcPdwx82P3YcHX32WBYWF2lkDnY9/cJAk5XInuZhCahYJMjKZHF4+PpJ+e047mwhFdQ29q3aiJL8AispqSevw9PKCl7e31XbC8X0lmg/iIrvXbERhdq5DbcdVZeX865ff4dtXrpF2TBTnqC6vxPYVax3q9bEnjDGEhIfisbdfwc2P3kcBxkp8A/xs3QSXZpkgI5dBinOEjTjnqK6oRLETTCrmLHLTsyS/wsTLx1vS8i/XZ/hAyGTS9gCplSqs/XWZpHVYkqK6hn/x4lvYt2Er9Dq9Vepc8tk3UFRWUZgxEWMM3n6++N/n8zDm+ikUYqxIJpfZXcecK7FIkJHL5ZIGGQBQVtXg5N5DktZBjLdl2T8QRekmKmSMSdZd2xxvX18W16eHpD2LXOQ4tnMfMs4l2f2Besc/6/mc2x9G4tGTkr7Xl9Oo1Njwxwqr1ecMBJkMfYYPwrzfFtGgXhtgTAAlGduxSJDx9vNlgWEhkg4OEkURW5evlqx8YrwDm3bw9MRkaQf6CgztOsZIVn5zeg7uL/kA48qyCix84wNJ6zCHWqHknz//Bv/+7Y9RlJMv8SX2VxINBqz5ZRlSTifYfdizNcYYBEFAz8H98dwn7yAmrhMdTW1AJrP7mUycmsVe/XYdYyXPo1VlFfjts4W0c7OhytJyvnrxUmkvuwYgMAEdusZJWkdTug3oA3dPCReQBMBFEdmp6fjmtfe4Wqmyq+356I69fO79T+Hg5p1WO5XUlFqNBu8//iKSTpyxq9enabZropuHO66773a89fPXzC8ogEKMjQhSXrVrI9a6YtQSLPbqx8Z3lvxyLZFzbFu+Gqf2H3aAnZtz2r5yLTLPp0j+LV3mJkdMfCdJ62hKTFxnBIYGS14PFzn2rNuCNYuXSl6XMcqKivnHz8zhX7w4F1kSX1ZvLFWNAt/O/QgVxaW2b0wzqssr+bL5P9pkRmI3dzc8NOc5Wm7ADkg6/QhplcUWjezUIx6CIEA0SLiQIOdQK1X486vvEdOlEw+JDKcPsBUd2b6Hr1m8VNr3uEHPQf2tesVSo/DoKNahaxdenFsg+cHcoNfjnx9+g6K6hs987H4EhoZY/fkmnzrL923Yhr3rtkCtUFp1LExrOOfIz8zGa3c/hkfffJEPGD3cbj7vxXkF/Niufdjw+worzHB9KcYYwqKjcO8LT2L41ePs5jVxZYJgvWkiyJUsFiPDo9uxuN7SDpQEGifNSsZ7j72Awuw8u/2m5myO7tzLv537EdRWmqBpzPQpVqmnKWNnXAPBSue8DQYDti1fg3mznkdOarrVtueywhL+xQtz+fuPvYBNS1dCWV1jVyGmEeccpQVFmD/nHWxdvtrmn3e1UsX/Xvgzf/O+J7Hkk29QnJtv1deNCQKiO3fAG99/QSHGjjDqkLEpi/XIAMCkmdcj9cw5GCT+xs45R05aOj5//g088MpsTuuHSEejVPHdazfjz6++g0qptMpwgIDgIHQf0Ff6ipoxdMJo1rFbPLfW5GwGvR7ZyWl4876ncM1dt/Dhk8cjNr6zxbfp7OR0npqQiNP7D+P0gaPQKFVt6knw8vGBVqMGF62XK2oqq/H9O5/i1L7DfMZDd6Fr315W/cynJZznR7btwc5/N6CqrNwmp94YYxg0ZgTuf2U2ImOiaZ9nR3S1Ols3waVZNMj0GT4Y/sGB1lmtmgNZyan4+Jk5GDllAr/7+SdoGm4Ly0hM5ks+/QbJp85CV1tnlToZY+jYPQ4+/radYGrK7Tfh27kfWu3bNuccyhoFVn7/K7b8vRoDRg/nU26/EXG9e5i1TSuqqvnhrbuxc/UGFGXnQa1UQq83gLfxeTGBod/IITi57xBqNVpzmmYyLoo4umMvEo+dQq+hA/ldz85CVIcYyT7zVWXl/PC2Pdi/cRty0zKhUijBRdEmIUbuJsc1d8/EzbPuh4+fL+3n7ExdbS1sOejb1Vk0yIREhLMeg/rxg5t3WuXDzkUOZXUNtq5Yg8Pb92DaHTfx7oP6ISq2PWj8TNvkZ2TzwpxcHNm+F3vXb4Fep7PqN28mMAwYPcLmobTHoH4Ib98OxblWvPyYcxj0BlSVlWPX6g3Yt34rYrt25r2HDEBMXGeERIbDx88Xnt7ecGtYEkQURYiiCIPeAFV1DarKylGSX4i8jGzkZWQhPyMbaqXKYgdgxhi6DeiDWq0Wp/YfaXMgaitRFKGoqsbhbbtxat8hDB53Fe9/1TB06BaHiPbtzNpuSguLeUleATLPp+DswWNIOnkGGrXGZuGlkSAIuOrayRhz3RQoKqtoskA703gccrYc40hXLVk0yADAsEnjcGjrbnArDAhtxEUR1eUV+GvhT/Dy9oZ/UCDad+nE+4wYhPadOiKsfRQCg4PgTd9kLlFdUcmrSstRlJOHrJR0nNp3CBUlZVBUVjd8w7AyxuDp5YUx19tufEyjqA7t2ahpk/g/PyyxyUGMixy6ujqkJyQhPSEJgiDAw9sL7h7ucHNzr59JFPU9OZxziKKIWo0WWrUGep2U3dwM/kGBeOi1/+HlWx+EqkYpYV3N46IIrVqDfRu24uCWHfALDIBfYAA6dIvjvQb3R0xcZ4RFRyIkoukvNEW5+TwnJR1ZKWnISUlHYXYetGo1lFU19cHPDq7aasQ5x5mDR3HuyAlbN4U0pWHmeXvaZlyNxYPMwNEjEBXbHvmZ2ZYuulVcrL+qSaNSozivAMd376//Q0OydPdw577+/vAN8IdvgB/8AvzhGxgAX38/ePn6wN3TAx6ennD39IC7pwfkcjlkcnnD/2WQNfm77KLb5GCCBbISR8O3bD30ej0MegMMen3Dj6Hhtv9+b7yfXqdHrVaLOm0t6rS1qNVqoFIooaxWQFldA2VVNRTVNVBWK6CqUTSMZeKXfJPgl/1uTTJBwIwH74J/UKBdBM7r77sNe9dtRmlBkc13UqIoQqNUQaNUAQxgYJe9TdZ53xgAv0B/RMZEs9HXTeGb/1xl89emvherAtXllchLz8L+DdsaJlllkLvJubuHBwAOzutDgUGnh06na3IuJFs/l6ZwzlFRXOpQqxG7FDvcZlyNxYOMl683e+TNF/i8R/8n8TfD5l2xM2r4vVajRa1Gi4qS0vrbGw4Ijf9unGK6cXfBBAGCTIAgCBBksob/CxCEi/990W0y4b/yzCRyDtFggCiK4KII0WCAQRTBDWLD6QQDxMZ/G+p/5+Jla6U2PG9+0b+bfH3sRHTnDphw03W2bsYFvgH+7LanHubfvfWxbXqomsNtuCouA3wDAwAAo6+9GnvXbYGqRmGbtlzmku26fqOHrrbOauO7JGenn1tCbM3iQQYAeg8dyIZOGM0Pbt1l9XPoxriww2vtgGAwADQY3SoEmQzjb7gWQWHWn0ulJYPGjkSvIQNw6sBhq44Vsl8MfgH+AIBu/fuwSTdfz9ct+UvyKxUJIaQ5kl39fu29tzrltM1EGrHxnTH+xmtt3Ywr+Ab4szufnQVPb+uuxG3PfBuCDADc88KTrN+ooZY5pUoIIW0gWdLo1r8Pu/3pRyRft4Y4NsYYgsJC8Nwnb8E3wM8uj4adenRlD7z8DDw8PW3dFJuTyWXwC7x0TZ+Zjz+IgBDpl3UgxBVpVGqbdAVLPwTBcuVL2mVy48N3sxFTJtA6FKRZgiDglsceQHTnjnYZYhqNnDoRo6+f7NK9jIwxBEeEXXF7fN+e7KFXn4OXD/VaEWJpujrbjPGq00o3TxQHoNdbblFayffKMx+7H5Ex0Q51TTqxDjd3N4yaNhFTbr/R7jcOT28vdu/zT6Jb/96QyVxvXRXGGHz8/TBq6sQm/z5i8nh2zwtPwtPby8otI8SJcVhngtkmlBYUSVc451BbcOoGyYNMZGx79uqiT9CxezyFGXIBa5jk69G5L9m6KUbz9vNlz3w0F13793apbbn+9F8oHn/nFdzxzKPNPvHJt97Abnn8AZcMeoRIgQMoK5QwULSgIDtP0vIVVTVQVtdY5PySVfrJozrEsFlvvYTQqAiXOgCQpgkyAb2HDsR9Lz4NT28vh9ogwtpFsifnvYb2XTq6xLbs6e2FoZPG4PPVv2HYpLGtPuEbHryLPfz6/y4ZEEwIaSPOkZOaafVqVQoFz0uXrl4OjrLCItRa6PSV1U74x/XuwV6a/yF6DO7v0uMMXBqrXzPm6pkz8PwX8+x2cG9rImOj2SsLPsaA0cOddluWyWXoOag/nvvkbTw17zX4+hv/Xl196w3syfdeQ1h0lEuEPUKkwsGRnnDe6vWW5BVCWV0j3YBfDlSUlqMoJ98ixVl1L9ypezyb/dFcdB/YF3I3N9rJuRDGGLx9fHD9fXfgkTdeYKYcGO1RREw7Nvujueh/1TC4e3o4x7bMGASZDAEhQbjlsQcwZ9EnGDRuFPNqw/pFQ8ZfxV779lPE9+0FN3f6rBPSJhzITklDRXGpVa9cyknLgKKqRtI6RIMB+9ZvtUhZzBazvKqVKr7h9+VY/fNSaFQqq9dPrIsxhsgO7XHX7FkYPnm80x3RNi5dyf/8+nuoFbZZd8gSGGNw9/TAmOunYuodN6JD1ziLvE/K6hq+Y9U6/PvzH6iprKbZaQkxEWMMs956CZNumW61fee7jzzHTx84Ink93r4++ODPHxDduYNZz80mQaZRdnI6n//qu8hNy4BBTzODOiMPL08MmzQWz3z4ptMFmIsV5xXwz59/A5nnUyE60Cy3giDAy9cHPQb1x13PPYaYLtJcBl+YnccXf/glEo+eglarpUBDiAmCI8Lw6Ypf4B8s/Tp054+f5m89+AwMFrw8ujlMEDDjwTtx93OPO26QAYDK0jJ+cMsubFuxBnnpWRBFg9Mth+5qGGOQu7uh7/DBmHjzdPQZPghePt5OHWQAoKywmB/cshM7/1mPvIxsuw40gkyGiPbtMGraRAwedxXi+vSwyvtzfPcBvuvfDTh14Ai0ao1dLmFCiL0RBAHT7roFD7wyW9LPaWVpOf/wyZeQkZhstTX5wtu3w6sLP0F7M75E2TzINFLVKPi/P/2OLX+vRq1GA4PeYLeLG5ImMEBgAuRubggKD8U9zz+B4VePc/rw0pTGU6cbfv8bqhpl/cKfNt6WGWNgAoPczQ2e3t647p5bMeX2G+Fjo7FKWclp/K8FPyLh8HHU1dbVL3rKbbfyOiH2zi8oAG989wU69+om2Wd21Q+/8b8W/GiV3phGgiCg74jBeP37Lxw/yDQqKyzmJ/YexJHte5B47BTqtHa06jBpGmPwDwzA4HGjMHjCaPQeOhDebRgg6myKc/P5vg3bcGDTDuSmZUC0Ue+DTCZD517d0WfYIPQY1A9d+/WyWYC5XHZKOj939CTOHjqGc0dOQK2kMXOENIUxhvZdOuGp919Dl17dLf753fnPev7LR19DZYOxfkwQcO3dM3HbUw+3qffe7oLMxcqLS/mOVWuxY9V6VJVVwKDX2+xgQC7CGGQyATK5HLFdu+Cau2ZizHWT7eLAaK9yUjP4ht+X4+CWnZL2ODLGIAgCBLkMHh4eGDtjGq6951aER0c5xPuzaekqvn3VWhRk5cCgN8BgMNDpJ0IaMMbQvnNHzFn0iUU/04e27uIL5syDVqOxVJEmE2Qy3PXsLMx48C7nCjKNtCo1z05JR05aBvLSs5GfkYWi3DxUlVVAV6dr6JLm9b3SDc+How3d1K2+fMa9vuZuXcY3u4V7tuVtZey/tjf8mzEGMAYvH28ER4QhumMsojt3QPvOHdGxe7xZ5zVdUU1FFU89cw7JpxJQkJWD0sIilBUWQ1WjgCg2bMeXfSYbt+vGS5jr3xOAof69cXN3Q1SHGLTrGIOojrGI7hiLqI4xaNcx1mF7xsqLSnheZjby07OQn5mNgqxcVJSUoqaiEhqVBpyL9R/1Jl4vwNTNv5V72/8ukrTFFZ8M1vKf7QRjDF379cIDc561SM/MoS27+K+fzEdZYbHNT4G7ubvj5ln34dp7bjWpZ8YhgkxzlNUKXpCVg4zEZBTl1AebqrJyVJVXoFajre+9ufD8Gl6Ti+azuGRqi8aDeOPB4oo7NN6t8WBy4Zb/isblf7u43v/+frFLX/+GEMYvvoXj4hsv+dvl7x3n/+1zLwt2l/yziTpZwxwi3n6+CAoNQUBYMIJCQhAT1wmde3VDaGSEw83C6yi0ajUvLy5F8ukEpJxKQFVZ/fZb/6NBrbYWtRoNvH19ER4ThfDodoiIjkJ4+3b1/46Jgo+ffZwqkppWrebKGiXyG0JObnomCrJyoVGqUKvVXui9afoz1PCfi77jNLn/a+pzdFGhl358LpR00U1N/PuSJjT1Zeuix1xo5mXtvvx5Xf7Yi9rKm77jJfsAfvFjr3jMRf+40Ax+5f3ahIE17g+Fi8I5/tsHN/wKxoSL9sWNj0PD4y76vSHUMwDs4jIvfDljF74AXCi/8Tbgosf99yXhkvtcOD5cfAwQLr3tv18gNB4ELvrCcfF9G29rbOfFzxeNr8TFdV30fBvrDo4Iw52zZyE4PLTNn/39G7fxP7/+HnW1dXZzJaFMLsf4G6/FrU886BpBhhBCCCGuzTnnVyeEEEKIS6AgQwghhBCHRUGGEEIIIQ6LggwhhBBCHBYFGUIIIYQ4LAoyhBBCCHFYFGQIIYQQ4rAoyFjJiT0HeXFeAU3aQ6wuPeE8P7XvsFW2vcLsXH54227azgkhViO3dQNcwfJFi/m6JX+hXccYvPTVBzzIjJkYCTFF0skzfMGceaitrcVT773G+40cKtm2l5uWyb966W2UFRVDq9bwsdOn0nZOCJEc9chIbOMfK/iaxUuhUiiRdvY8Pvvf6yjKyaNvrERyaQnn+cLX30dxXgEqS8rwxQtv4vjuA5JsewVZOXzRmx8iOyUNyuoafPfWx9j5zwbazgkhkqMlCiS08rtf+T8//gat+r8VRZnA0K1fbzz/+TxQzwyRStKJM3z+nHdRkl94ydo4QeGheOLdORhw1XCLbXu5aZn8y5feQk5K+iV1+Qb44/6Xn8G4GdNoOyeESIZ6ZCSy4Y/lfNUPSy4JMQDARY7kUwn4ePYcFOfmU4okFpeZlMoXvDrvihADAFWl5fjihbk4ue+QRba94twC/s3r710RYgBAVaPAd299hF2rN9J2TgiRDAUZCaz49he+7OsfUavRNvl3zjkyziVj/qvzUFlSRjt5YjGJR0/yT2e/iuK8giZXKeacQ6NUYeEbH5h9mikrOY1/PHsO0hOSmq1Lr9Pjl4++ptNMhBDJUJCxsA1/rOD//Pgb1Epli/czGAxIPnkWHz79CvXMEIvISUnni+Z+1GRPzMU456gsKcP8Oe/g9IEjbdr2SguK+HdvfdxkT8zldSmra/DDu59i95pNtJ0TQiyOgowFrfp+Cf/zq++a7Ym5XH3PTBIWvvEBKkupZ4a0XeKxU/yDJ19GUU5ei8HiYspqBRa8Og/Hd+03advLTknnHzz5EtLOJhpdV11tLRZ/8CV2/LOetnNCiEXRYF8LWf/b3/z3LxZBV1tn8mOZwNChaxxe+vp9hEe3o4GRxCT5Gdn8/cdfREl+06eTWsIYg5evD1786n30GTao1W2vvLiUf/zMK8g4l9ymuuRucjzx7qsYfd1k2s4JIRZBPTIWsOr7JfzvhT+3KcQA9QOAc1Iz8M1r71PPDDFJwuHj/L1Zz7cpxAD/jZn5+uW3cXTH3hYLyDyfwt9//IU2hZjGunQ6HX5873NsX7mOtnNCiEVQj4yZ1v/2N//984XQ1enMLosxhpj4znhlwUcIj46ib6ykRQVZOfz9x19EcW5+m4LF5XwC/PDSVx+g15ABV2x7FSVl/OOnX0H6uaYH9prK3cMDT8x7FVddM4m2c0KIWahHxgz//vQHXzb/B4uEGKD+G2tuagYWvvEBqsrKKWGSZp07epK/+/BzFgsxAKCqVuDz59+4omcmKzmNvzfreYuFGKB+zMz3b39CPTOEELNRj0wbrf11Gf/980Uw6PUWL5sJAqI6tMebP3yJ0KgI+sZKLlGYncvffeQ5lBYUWSxYNKofM+ONVxd9iu4D+rLK0jL+/uMvIis5FVy0fF0yNzme+eBNjJw6gbZzQkibUJBpg9U//8FX/fAbVDUKyeoQBAE9hwzAsx+/hcDQYNrJEwD1Y2IWvfkhivMLAak+uwwICA7CtffchoObdyArKdXigeli3r4+uO+lpzHx5utpOyeEmIxOLZmotKCIr168FBqlStJ6OOdIPnkGB7fslLQe4lj2bdiGssJi6UIMAHBAUVWN1T//gdy0DElDDABo1RpsX7lW0joIIc6LgoyJwtpFsrcXz0enHvGS1iOTy3HL4w9g2p0307dUcsEdsx/F2BnTwATpPrqMMfQdMQTv/LoA0++/A3I3N8nqAgM6do/HrLdfka4OQohTo1NLbZSTmsHfvO8JKKstf3pJ7ibHLY89gFseu59CDGnSgjnz+J51myGKokXLFQQBfYYPxhs/fHFh2/vts2/42l//gmgwWLQuJgiIje+Md5cshLevD23rhJA2oR6ZNoqN78ze+XUhuvTqbtFvx+6eHrj1iYcoxJAW3fPikxhz/VTI5XKLlSnIBPQbORSz3nrpkttveewBXH//7XD39LBcXYKAzj27YfZHcynEEELMQj0yZspNy6zvmalRmHVVB2MMTBBw6xMPUoghRlvw6nt8z9pNZvfMMEFAvxGD8fr3XzS77f32+UK+9pdlZvfMMMYQ27UL3lo8H34B/rStE0LMQj0yZoqJ68Te/mUBOvXoalY57h4euO0p6okhprnn+Scw+rrJZvUKMsbQf9RQzHrr5Rbvd8us+3DdvbeaNWaGMYYuvbpj9sdvUYghhFgE9chYSE5qOn/3kedQWVYOmPiSyuRyzHziAdwyi0IMaZtFb3zAd67eaHJviSAI6DtyCF744j14ensZtf0t/eo7vvrnpSbPodQ4JubNH79CQHAgbeuEEIugHhkLiY3vwl7//nN07tHNpG/Hnt5euO3JhyjEELPc+dxjuGraJJPGzAiCgH6jhmLW3JeMDjEAcOPD92DaXTebNGZGEATE9e6BZz9+i0IMIcSiqEfGwrJT0vn7j7+AiuLSFuffuDAm5skHKcQQi1n05od85z/rWx0zwwSG/iOH4dlP3oKPv1+btj9je2YYY+jQLQ6vLvoUweGhtK0TQiyKemQsrEPXLuzVhZ+gYyvzzHh4eeG2px6mEEMs6s5nZ+Gqa66G0EKvIGMMA0YNx2Nvv9zmEAP81zPT0pgZxhji+vTEc5+8TSGGECIJ6pGRSFZyGv/kmTkoyS+8omdGJpfj1icexM2z7qMdO7E4rVrNf/14AXasWgfDZWNmGk8nPfPhXPgFWmaw7bL5P/B/f/oDet2li6cKgoDYrl3wyjcfIzQynLZ1QogkqEdGIh27xbEXv3ofHbp1+e/bMQO8fLxx65MUYoh0PL292R3PPIoRUyZAdtGYGUEQ0H/UMDz+9isWCzEAMOPBuzD5thsuGTMjCALi+vTAc5++QyGGECIp6pGRWFZyGv/0uddQnFsAxhhue/IhCjHEKtRKFf/ts4XYvnItOBfRf9QwPPXeawgIkWYR0r8W/Mj/+fE3GPQGdOgWhxe/eh8R7dvRtk4IkRQFGSvISkrlP773OQaMHo6bH6UQQ6ynprKK//Lh11ArlXjs7ZcRGBoi2fanUan5Xwt+QEZiCp6Y9yoiY6JpWyeESI6CjJXUVFRxf7rslNiAWqniuro6BAQHWWX7qygp4zSwlxBiLRRkCCGEEOKwaLAvIYQQQhwWBRlCCCGEOCwKMoQQQghxWBRkCCGEEOKwKMgQQgghxGFRkCGEEEKIw6IgQwghhBCHRUGGEEIIIQ6LggwhhBBCHBYFGUIIIYQ4LAoyhBBCiES0ag2tAyQxCjKEEEKIhWmUKn5iz0H+zsPP2ropTk9u6wYQQgghzqA4r4CfO3oS54+fRuqZcyjIzIG3n6+tm+X0KMhcprqikuekZkCv04Nz0WbtYIwhMiYaUR1imM0aQQghpFmqGgXPTErF2UPHcGrfYWQlp4FzDnAOzjk46KySNVCQuUxAcBDz8PTgh7fuwv6N26FWqgAbbIwMDL2HD8Lr331u9boJIcTZFGbn8pL8Qsjd3ODm5gY3D3fI3dwgd6//XRRF6GrroNPVQVdbh7paHXR1ddDV1UFVo0BNZRUUldVQVFWjuqISZYXFKMkvhFatBhcbggun4GILFGSa0LVfb9a1X29MmjmDf/rsayjJK4DYkLKt6eyhYygrKuahkRHUK0MIIWZw9/DAH198i7z0LHDOwRgDWP2XRjTsYet7U1Dfk8I56nf7DSFFFCmo2Cka7NuCjt3i2NyfvsKEm66Fu4e71es36A1Y+uV3Vq+XEEKcTUhkOHvqvdcQE98Juro61NXWok5bi1qtFrWa+p86bS3qamvre2bqdNDrdDDo9RANBgoxdoyCTCvC2kWyx95+hV1/3+2QyWVWr//Itj0oyMqlTxAhhJgptmsX9uS7ryIkMry+R4Y4BQoyRrrjmUfZPc8/Cf/gIKt+AOrq6nBq/2Gr1UcIIc4stmsXdtuTD8PN3Z3CjJOgIGOC6+69jd365IMQBMFqHwDRYMCpfRRkCCHEUibcdC274aG7Kcg4CQoyJpp6+03shofvhruHh9XqTDp5BoXZdHqJEEIs5epbpyMmrrOtm0EsgIJMG9zxzKNswk3XQhCs8/JpVWqs+mGJVeoihBBXEBQWykZOmWC1/TiRDl1+3Ua3PP4A8jKykXD4uOSj2UVRxL4N23DrEw/xsHaR1Bd6kdKCIp588qzZ74GPvx8GjhlBry0hLmTY5LFY9eMS1Gq0tm4KMQMFmTYKCA5iz336Nn/1zkdRnFsgeZgx6A04unMfrrnrFknrcTRJJ89i/px3IRoMZpXToWsXdOoRz4PCQinMEOIi2nfuyOL79eYJh47ZuinEDNSnZgb/oEB2y6z7IXdzk7wuLoo4ueeg5PU4Gs5Fi0xUyGH1+Q4JIXag77BBtm4CMRMFmVYc37WfV5SUNXuIG3fDNWzQuJGSn2flnOP8idMoyS+gw+1FuEgvByGk7boN6GPrJhAzUZBpRXpiMj599lWUF5c2e8R87K2X0b5LxwvTXEtFq9ZgzS/LpK3EwdDlk4QQcwSFhYDRgF+HRu9eK4py8pB+LhlrFi9t9j6+Af7sxofvgbu79Jdk71m7GSX5hdQN0YB2QIQQc8jd3ODp5WnrZhAz0FGgBcoaBS/NL4RoMGDbirVIPHa62QAxaOxIxMR3kr5XRqXGsV37pK3EgQgC9cgQQtpOJpPB08fb1s0gZqAg0wKtWoOi3AJwcNRptVj05geoKGn6FJO3ny97aM5zcJN44K/IRZzad0TSOhwJzQFBCDGHIJPBw9OTTlM7MDoKtCD1dAIqS8vql3XnHCX5Bdi2fE2z9+/avzcbfvV4aQ+uHEg5nYACmukXAJ1aIoSYhzFAkNF+xJHRu9eCzcv+ueR3g8GATctWtbhcwMRbroeXr4+k7VIrlNj85ypJ63AU1CNDCDEX9cY4NjoKNCM3LZMnnTx76Y0cqKmsxhcvzIVWrWkyzPQeOpB1H9AHTMKxG6IoYtvyNaiuqKReGUIIMQsDk3pwI5EUBZlmHN62u+nZYjlHTmo6Tu5tfnK6e198Ct6+vhK2DtDp6nBw0w5J63AEGpXK1k0ghDgyBskv0iDSoiDTBGW1gp8+cASiKDb5d71Oj70btjb7+OhOHdjQiWPqT75KhIscx/ccgEaldulemeqKKls3gRBCiA1RkGlCbloGspLTWrzP2YPHkXI6odkQMWzSWHh6Sjc3AeccKafPoaK4VLI6HEFNRaWtm0AIIcSGKMg0YePSldCqNS3eR6tW44d3Pm3271379kJYdJSkg8hUNQrsWr1RsvIdQU1FFVy6S4oQQlwcBZnL5KRm8GO79oE3c1qpEeccOWkZOLJ9T5PHUf/gQDZ2+hRJ2nixHf+sR0trQTk7ZY0CoChDCCEui4LMZXb+sx76Op1R9xVFjgMtDLi9euYMuHt6SDqQTFFVjSPbd0tXgR1TKRRcVaOgHEMIIS6MgsxFKkpK+dlDx8C5cUdGLoo4e+gYKkvLm3yAj78fGzZpLBiT7mUWDQYc332g2cvBnZmqRmGxMUIMko7NJoQQIhEKMhfJTc1ETlqm0UEGAKorKrHjn3XN/n3E5PGSL1uQnpCEsqISSeuwR8pqBcpLSk16v5ojyGSSBk5CCCHSoD33RdYuWdb03DGt2PjHSlSVVTR5NO3QLQ7BEWFmt60lyuoa7Fm7WdI67FFWUirqtLUWKcvT2wtyd2kDJyHEPtGEeI6NgkyDlNMJPOHwiTY9tqayCif2HGjyb+HRUSyudw9Jr17inGPT0hXQql1rTpkTe5qflNBUgaEh8PX3o70ZIYQ4GAoyDbYtXwODXt+mx4oGA060MNPv5FtvgEwua2vTWsU5h1atwZ51WySrw94U5ebzU/stswo4Exjad+lokbIIIYRYFwUZAMV5BTzp5Fmzxloknzzb7KDfnkP6s47du7a5bGNwznF4625olCqX6JU5sGk76rRai5Qlk8nQd/hgi5RFCCHEuijIADh//DRKCwrNKqO6oqrFy6DHXj9F0pWaOTiyklJRnG/e83AEVWXl/PDWXRB5y3P9GKvHoH7oMagfnVYihBAHREEGwKalK6DXte20UiPORWz8c1Wzf+8+sC/8gwPNqqPlBtRfQXV0x17p6rATCYdPICc1wyLzx8hkMsx87EHzCyKEEGITLh9kzhw8yjMSU8y+hJeBYeDoEc3+PSImGu27dJJ00C8A7Fi1Doqqaqc9vVRaUMT/XvSz2cETqB8bM3TiGHTqKe1pP0IIIdJx+SCzcelKi8xD4uXrg8m3zmj2796+PmzE5PGSz7pWXlyKQ1t3SVqHrWiUKv7Te1+gMDvX/ODJGNw9PHH7M4/Ay8ebTisRQoiDcukgk5OawTMSky0yw33Xvj0RGBrS4n1GTp0AX38/aS/FFkUc3LzDKWf63fzXPzhz6Ci4aH6ICQoLweyP3kR0pw4UYghxdbQXcGguHWTOHTmBipIywNxv94KAPsOHwNPbq8WPg19gABsxZbzkc8rkpGagKCdPsjpsYfEHX/LlixabPQEeYwyCTIYHXpmNoRPHuPzuS1Wj5M4Yes1RU1lFrwchDkRu6wbYilat4dtWrm11lWtjeHh4YNC4kUbdd+TUidi7bgs0KrXZ9TanprIKx3btR8fu8ZLVYS35Gdl8/e/LsfOf9dDV1ZlVFmMMnXp2xV2zH0O/UUNdNsRUlJTyvIxsHNu5D2cOHMX/Pn8HsfFdbN0sm6our+D5mTk4feAIDm7eibk/f81DIsKcehtRK5VcNIgQRRFcFCFyDgYGuZscvgH+Tv3ciXNx2SBzfNd+5KVnWaSsweNHGX2Kon3nDoiMbY/M8ykWqbspXOTY+ve/uOWx+yWrwxrW/voX37R0BUoLiiCa0WsmCAI8vL0w9fYbMe2uWxAc7twHqKaolSp+9tAxHNi0A1lJKagsq4BWpUZQeKi5HZIO7dT+w3zf+m1IS0hEVVkF1AolPH28ze6ltQeVpeU8JzUD5UXFqCqvQFVZBarLK1BVXgmtSg29Tg/ORXDOL/wwMAgyATKZjAtyGdw9PBAUFop2nWLRrkMs2nWMQVSHGPj4+7rcZ4jYL5cNMluXr27TukqXc3N3x4wH7zL6/oGhIaxb/948KznNIr1BTeGco7K0HLtXb+RjZ0xziB2OorKaK2sUqCorx4m9B7F33RZUlJS1+T2SyeXwDfBHUGgweg7uj0m3zkBsXGeHeC3aSlFVzbVqDbQaLVTVNSgrKkbm+VRkJCYjOzkNKoUCokG8dKC0ExywW6Ksrml4TTRQ1ShRWVKGzKQUZJxLRlZyKmoqqyGKhkvHXTnQa1JWWMwV1TUN73cJ8tKzkJeeidz0zIbPT8P7zXn9WMCGwGIKxtglP4Jchk49uvKeg/ojvm9PhLWLREhkOPyDAp3682VPtGoN16hUUCvV0NXVwaDXN/wYIIpiQxiVQyaTQSaXQe7mBk9vL3j5eMPHCZdicckgk3Y2keemm7bKdVMYY+jUoyuiOsSY9LixM6Zh2/I10EsUZID6MLNrzSYMnTSW2+NVOSlnzvEjW3ejVqtFUU4+aiqroKpR1H9bVLf9tJsgk8HTywvtOsYgKCwUASFB8PLxwf4N27Ef2+3iCNWhaxeMnDrhkvfk3JET/NSBI/D08oK7pwc8vDzh6eUFD08PuHt6gosiNBoNatUaNB6YtQ3/riorR3V5JRpDTK1GA1WNAlq1xiJX5NlKYU4e37FyHTy8POHh6QEPL6+Gf3vCw8sDnANatQa1mobXQ/Xf61JdUYmqsvKG2xpeE4USGqXKoV8TAEg9m8gPb9uD9ITzqCwtg7JaAZVCAV2teadem8MvDz96PZJPnkXyybMQZDL4BwYgNCoC/a8azsfNmIrI2PZ2t79xBmkJ5/mZA0eRlZyKypIyqJUqaFRq6Op0/wUZQ0OQEeoDjEzW8OMmrw8y3t7w9vflEe3bIapDe3Tu2R29hgxw+PfLJYPMiT0HoaisNrscxhj6jWx9kO/l4vv0ZPH9evHzx0+b3Ybm1A/6TUdBVg669OouWT1tlZGQhLVL/rqkx6XxG6M5RIMBaqUSaQnn/xtUbWcf01FTJ2Hk1AmX3NZr6EB2dOc+vvH3FaitrR/Q3FSz+eW/NfFy8WZudzRRse2Zt58PX75oMXR1OgBGviZX3miRbcseFOXk8W9eew8FmTkXwoUtg5loMKCqvALVFZVIT0zGml+Wot/IoXzCjdei5+D+Tvnt3xYSj53k7z32Aupq667Yjo16/1kT63s33Obm4c67DeiD3kMGIq5PT4REhiEkItzk45otuWSQ2fHPeot8+JkgYNC4UW167ORbb0DSiTOS7oRqKqtx+sBRuwwy9b3dpndzm1ZH0wc1W2vuOd/65EPQqtTY8e/6+lMCVm6XPZp25y1QKZRYu/hPGAwGl39N/vz6BxRk5kCUsDe3LRpPX9Vpa3Fs136cPXQcHbt1wfX338GHTRrrMAdEe1RRUsZ/fv9L1Glr276/bDy12MRttRotzh48hoTDxyF3c0NASDCiOrTHgNHD+fBJ4xDWLtLu3z+Xu/x66/LVvLyoxCKnlTp2i0Nc7x5tepPj+vZEaFSE5HPK7Pp3AzQqtavv/x2Ct68Pu+/lZ9BjQD8wCdflciSe3l7s7uceZ8Mnj4Mgk24FeUew4Y8V/NDWnXYXYi7HRRFatRrJpxLwxQtz8fnzb/CspFS73QfZ+1F695pNyMvIkvxLn2gQUaetRWl+Ic4ePIbfPvkGz994H754cS4/sfsALyssttv30KX2lsrqGr59xVqLlCXIBNwxe1abHx8V255ZY2r84tx8l1h/yVl4+XizR+a+gHYdYiRfzsKR3Dn7MbTv3NH+jzoSyU5J42t/+RMGvfkXKFgL5xx6nQ4HNu3Ah0++hO0r19rtgdBe5Wdk87W//gm93vwlWUzBOYcoilArldi/YRs+nj0H82b9D0u//I5XlJTa3fvoUkEm83wKCrLMn94eANp37oj+Zs5FMmzSWMkPVqIoYtuK1ZLWQSyrfeeO7NYnHnT5HoiLRcS0Y7M/fhPuHh62borVadUavuSTb1BWVGzrprRZeXEpvnv7E/z68XyurK6xuwOhPVIplPybN96vH89p41dMr9MjPyMb//70O56/8T7889PvvLSgyG7eR5cKMsd2H4BGpTK7HMYY+o4cYnY5g8eOgl9QoOQz/RZk5iI9IcluNjrSulHXTGKDx42kU0wX6dA1jl11zSQILvaarPphCc4eOmb20hy2VH/qwoBNf67C16+8A3v8Vm9v9m/chkwLLGhsKY29NMrqGiz7+gfMe/R/+PWT+by00PaBxmX2CMoaBd+/YatFNgqZXI5+I4eaXY6Pvx8bO32q5L0yNVVVOHvomKR1EMu78ZF74eHpej0QLRk34xp4+frYuhlWk3jsFN+2fI1ZE0LaE11dHU7tO4zv3voYqhqFczwpCSira/iaxX+aPZu5FDjnMOj1yM/Mxrolf+PtB5/BmYPHbPpeukyQ2fznKtRUVlmkrPDoKHTt19siZV01bRK8/aTdMXORY8e/6yWtg1heeHQUYuM727oZdqXn4P4sKCzU1s2wCkVVNf/ts4X1+y0nCTJA/enuMweP4a8FP9q6KXbr27kfojivwNbNaBUXRRTl5OOjp17Cglfn8fLiEptsqC4RZJTVNXz7yrUQLdE1yximP3gnvH19LNKNEh7TDjFx0q5zwzlHYXYeDm3Z5Tx7QxfgHxTI2nWMddkBrs3pPqCPS5xy+/Wj+UhPOG/rZkhCp6vDpmWrsOK7X2mfdJmDm3fwE3sOSTbzuxRqa2uxe+1mvHjLgzhzyPq9M86/NwCQeOyURb7VMMYQEhGGUVMnWqZhAHz9/VivIf2lP+/POTYvWwVa6dixdOgWB4G5xMfUaP2vGgbBya/oOrR1Fz+6c6/dX2rdZhwQRY4Nv/+N8ydO0z7pIqsXL7XLU0ot4vW9M4rKKsx/5R2s/fUvq76nLrGHPLJ9D+q0tWaXwxhD/1HDYOkp/4dfPQ4yubRXqHDOkZ2agdy0TEnrIZbVrmMsXYZ9md5DBzl1j4yyuob/8tHXUCvNvzDBrnGOmooqrP1lma1bYjeWfPoNT09IspsBvqZqXOfvjy8WYtnXP1jtSTjv3qBBeXEpP7pzn0W+2cjc5BgwergFWnWpjt3jWc/BAyxe7uUUlVU4d/SE5PUQy/EL9KcgcxnfAD/m4+dr62ZIQlWj4Ive/BCWmLTTUZzYcwB71m12jSfbgtMHj/KNS1c4xfuu1+nxz4+/Yf6r7/KKkjLJn5DTB5l1S/6CWqG0SFkenp7oM2yQRcq63HX33Sb5AYtzjr3rt0haB7Esv8AAgILMFXwD/G3dBEkc2b4Xx3cfcIqDmbEMegNWff8bqsoqXOdJN2Hdkr+gb1hTzBkYDAbsXbsFv3++UPK6nHqtpdKCIr5/4zaL7BQEQcDVM6dLtghax+7xiOoYg0ILTdjXnLz0LBzZvpcPnTjapkfHyNhoDJs0Fpwb11PGOUduaiYKsnIkaQ9jDN0G9EFgSLBxg2s5YNDrodVoUF1eheryCqiUyvo1kkTRYu+hX2AA9cg0QepTsbaQk5LO/174E/Q65zmYGYNzjpK8Apw5eARjrp9q6+bYxMalK3nCoWNOF2BFUcSBTdvh4eXJ737uccmOn04dZBKPnUJNRZVFyvLw8sSMB++2SFlNCQoNYV379eKF2XmSXmopGkT889NvGDpxtGR1GGPA6OHM1NN0v36ygBf8Ik2QEQQBNz1yLwaOGdGmD5pWreGqGgUSjpzArtUbkXjsFLgo1s//Ycb76RvgzwSZ4Fx7NwtwtnCnVqr416+8g7LCts/e+99q7w0rHV+84nEzy4bzi/4h9SKuLdHpdDi8bY9LBpmc1HS+5JP50OmsuwyBteh1emxfuQ6eXl6476WnJanDqYPMkR17LfbtZuCYEfANkHZJ+iHjR2PP2i2SzkbNOUdRTh7SEs7zti54aSuCIGFzGcy6cszT24t5enth7PSpGDt9Kgoyc/jaX5dh95pNqKs1b6C5sx20LcLJXpONS1ciPzO7zUFCJpcjNDIcoe0iERYVgfDoKARHhMPLxxueXp7waPgRZDKIoghRb4BWo0FVWQUqS8tRWVKKnLRMZCenWWy+LVNwUcSZg0dRXV7BA0KCnevNbcWqH36HXm9wqrmCLtc4q3NUx1g++dYZFn9/nTbIlBYW8ZN7D1mkLLmbHANGj7BIWS0ZNmks8/H35cqqGkm/GalqlEg4fBxxvXtIVoera9cpls166yVMvu0G/vXL75i1ei2jy6+v4ExHuuyUNL7q+1+hN/IbORMYBEEGLx8v9B0xFCOnjEePQf3g5uFh9vxWqhoFP3f0JP78+nsUZObAYLDeIpVatQb7N+7ANXffYrU6be3MwaP84OYdDjVnTFvp6urwy4dfITKmHe87YohFP8JOG2SWff0j9Ba6Ft83wB/dB/SxSFmtueaumVi+6Gdwg4RLtosi9m/cjhseku5UGanXqUdX9so3H/HfPluIozv2wtCGHZYgc6bDtoU4SY9MSX4h/+qlt1Gr1Ta9MCBjEBiDTC5HRPt26Ng9Hl16d0dc7x7o0LULvP18LfpC+Pj7saETx6DviMH8xJ6D2LZiDRKOnAAXrXPa6cCm7Zhw07Xc09vLym+w9benopw8/s3r78Ng5ZWtbUlXV4dl839ATFwnHhQWarEX3SmDTFFOHj+2yzKXXDfOHRMZ294qW/q4GdOw4fflUFRVS1YH5xzZyWk4feAI7zfSvBW8SesiYqLZC1++h18++ppv+nOlycdgOrV0JWd5TTYtXYm89KxLQgxjrP75MQYvH28Mv3ocxs2YhujOHeAfFGiVJ+7p7c1GTp2IAVcN52uWLMPqH/+Arq5O0jDDwVGSX4CS/ELrL81hg81p3ZK/UFFc2vwdGMDq/4MLo53qBz8129xLxjwBAOcX/m8POOdIS0jC9+9+ipe//tBi5TplkDm59xBqNRqLlCV3c8P0B+6wSFnGCGsXyeL79uQn9hyUtB6Rc/z70+8WWfySGOf+l59h3n4+vLK0wtZNcXjOEGSO7tzHty5ffckXLrmbHO06xqJb/z4YNG4Ueg7ub7HlUNrCy9eH3fbEQ/D19+e/f7ZQ2hlnef3ppZqKSunqsBNJJ8/yA5t2NBsMmSAgMDQYIRHhCIkIQ2hkBPxDAuEfFAj/wED4BQXAx8/3worUokGEwaCHskaB8qISlBeVoKK4FBUlZSjIzkVFcQkMeuudJmyJaDDg+K4D2Ld+K7/q2qstsm07ZZA5vH2PRd40xhi6D+yD2PguVt2R9Bo6EKf2HZZ2enLOkZGYgtSziTy+T0/HPyo4iFufeIiVFth+2XtH5+gbbH5mNv/+7Y+h1WghCALcPT0xcMxwXH3rDYiN64yAkCC7eorX3j2TcVHkSz5dANEg3X6pVqOVtDfaHmhUKv7Na+9deJ6MMQiCAA9vL/QeMgADx41C17694OPnC3dPD/gFBrR5W1ArVVyrVqOssAQn9x3C3rVbUFpQCNGCU0S0BRdFrPvtb/QdOYRbopfR6YJMdnIaTzpxxiJvkkwux7CJYy3QKtP0HzkUf371veTrrGiUKiQcPo74Pj0lrYdcKqxdpF0dpBySlFewWcHqn/6AwSCi7/DB6DdyCIZMGI2oDjF2/aTG33ANju8+gITDxyU7CBoMBpQVlUhStr1Yt+QvlBUWIyQyHFEdYhAb3xm9Bg9AtwF9LB5gvX19mLevD4LDw9C1Xy9cf+9t/NT+wzi8bTeSTyWgorgUIhebHp8lIc450s8lYceq9bjhobvMLs/pgszvXyyy2CXXPv6+6DG4v0XKMkWHbnEsIqYdz8/IlrQeURRxZPte3PjwPZLWQ4ilOfKppf0bt/OgsFC8vXg+QiLDbXrqyBQ+/n5swk3X8nNHT4JLeDVTcW6+ZGXbWmlBEc/LyMYT8+Ygvm8v+AcFWvX99/bzZSOnTsTIqRNRlJvP//3xd+xavREGvd7qPTRcFLHq+1/Rd8Rg3rlnN7NeA6e6rjPjfAo/d+SkRcpijKFDt3h06Grd00qNeg8daJV6MhKTce7ICTrVQRyKIweZUdMmsjtmP8pi4joxRwkxjUZfO1nyda6Kcpw3yIS1i2TPffI2G33tZBYZE23T9z8yJpo99vbL7I3vP0e/kUNtMlu2RqXG1uVrzC7HqYLMid0HoLNQb4wgk2H6/bdbpKy26C3Rmk6XEw0GLFvwo1XqIsRyHOr471T6jhgi6erj5cXOfWrJ3vQaOpA9+8lbuPt/T8DD09OqXxI45zi9/zCK8wrM+jLtXEFmzwGLTSwUG98Z/UcNs9neslP3eKvUwzlH5vlUZCQmU68McRgO3CHj8PqNGirpwc7cmbDbwtU3J98Af3b9fbezZz95G5Gx0ZIG1cuVFRVj95pNZpXhNEHmzKFjPDMp1SJlMcYwatoki5TVVm4e7larS1dbi1P7D1utPkLMRknGZoLDQyV9+Y2d4dhyaFtqNGTCVezFrz5AbFwnq/XMiAYR63/7GxUlZW3+Mu00QWbZ1z9YbAl030B/9BzczyJltVVdrYTzNVxGFEUc3bHPavURU9GO9nKOPEbG4Un82rvSTLf2KDa+M3vq/dcRY8Uwo1GqcHDzjjY/3imCTNKJMzz9XJJFRl0zxtCuQyxi4qw8s+RlrDlyv/70UjKSTyXQ6SXiEJqf25RIrbygWNKJYkWRdkO21qlHV/bsJ28jtF2EVcIM5xwn9hyEWqls05vvFEHm8Pbdllt0izFMvPl6ePl423RPmXb2vFXr0+v0+Hvhz1atk5A2oxxjMwlHT9h0MjViHbHxndmDrzwLbz9fyXvhOIDslDSUFbZtoLfDBxmNUsVP7jlkmQ8WYwgOD8WIKePML8tMR7bvsXqd54+fokG/xCHQqSXbUFbX8DMHjrrEas0EGDJhNJt2580QpP68cY7q8kokHD7epoc7fJA5e/g48jOzLRJkBKF+kK+Xj23ndshJTec5qelWr1dXV4eT+w5ZvV5CTEVBxjZ2rd4ARbVzLyFALnX704+wrv16S14P5xwHt+xs02MdPsgsm/+Dxbo5vX19MHDMCIuUZY79G7fDIOF6Js3hIsepfXT1ErF/FGSsLzctk2/+619wGsPicmY+8QB8A/wlrycjMRltWYvOoYPM8d0HeH6mZabxZ4whrF0UOnaLs0h5bVVaUMQPbt5ps67b1DOJyExKpT0VsW+UY6yqIDOHf/jkSyjMynXS8TG0QbWk38ihrM/wQZJ/gdDV6XC2DaeXHDrIHN1hmVWugfogM3TCGPgG+Ntsi9aq1HzR3I9QmJ1rqybAoNfjjy8W2ax+QoxBPTLWs+nPVfz9J15AcV6BrZtCbOimR+6FTC7t8oxcFHH2kAsFmcqycp5w+ITFyvPw8sLVt063WHmm0qjU/M/5PyDh0DHbLq/OOc4eOo6c1Axn/NpFnARdfi0ttULJE46c4HPueIT//MGXKM6lEOPqOvXoyoZMGC3prL+ccxTl5EFZXWPS8cdhV78+sm0PSguKLFbeiCnjERgaYpO9Y1FuPv/ji29xbOc+iHbQbcu5iKM79iI23rZz6RBCrEelUPCU0+eQeOwUzh8/g/SE89DrdE56Kom0xdUzp+P0gcNQK1SS1aGsroGyRmHSmByHDTIrvv0FooXGkbh5uGPUtIkWKctUGYkpfP6r7yIvPctuLmlsHPR786z7bN0UApqNn0hHrVTxotx87Fi5Fgc27YBKoYBoECm8kCbFxHVCeHQ7ZFloOaCmKKtroKpRmPQYhwwy+zdu59UVlRabyTcypj3ad+lofsNMcHjbbr57zSac3HsIujrrLUdgDM450hLOI/1cEu/SqzsdRon9oXRnsuLcAl5aUIjc9CwUZGajIDsXRdl5KCkospsvUcS+BYWFso7d4nh2cppkYVejUqOytNykxzhkkDm4ZSc4t9RMvkDvoQMQEhEu+Z6xKCef71i1FjtXb0BNeRVELtrtpYy6ujqs+mEJXvzyfVs3hRDSBunnkvixXftxcs9BZKek1U/9zzk4UP//hgMR9b4QUwyeMBp7122BwWCZC20uJ4oG5KamY/C4UUY/xuGCTFFuPk8+eaZ+TmMLkMvlmDTTMoN81UoVV9UooFIoUVNRidKCIpQWFKEkvxAFmTnITc+ErrYO/KKdiD07secgclLTeWx8F/r6S4idKi0o4vmZ2SjIzEF+ZjbyM7KRn5mDmsoqcFF0mP0NcQw9B/WDm4c7DGqNNBVwoKSg2KSHOFyQ2b9xu8ndTs1hjKHXkIHo0DWuxQO1VqXmuemZyEpOR1lBEVSK+rCiVqigViqhVqqgqKqGWqECb+hlEUURomiAaIOJ7SxFr9Pj8LY9iI3vYuumEEIuknTiDD+2ax+O7z6AkvxCGPQGiAaDxcYNuhz6qmY0/6BAFhvfhaecTpCkfA6OqjInPrVUVV7BNy9bZbHy3NzdMOGmawEANZXVvCArB/kZ2chLz0RRbj4qiktRUVKKqvJKlzyHzEURCYeP47p7buVevrZdtoGQi7nSPDJlhcU843wK0hPOI+V0AjISU6BSKCHpEtSEtKD7wD6QKsiAA9XlFSY9xKGCzOGtu0xOai3xDw5CZWk53nvseZ529jx0tXXQ6/UQDQZwcIDT+ePUs4koyS9EBxvPeEyIK1ErlPzIjr3Y+c96ZCWnXdg3NZ4qIsSW4nr3kKxsDqCqzEmDjEal5kd37rPo4NjyohL8+vF8OofcAn2dDqt++A3Pffq2rZtCiFMryMrlqWfOIeHICZw5eBRVpeUQKbgQOxQSGQFBJkgzdIJzKKprTHqIwwSZ0sIipJ09b9EPNQWY1omiiCPb96AoJ49HxrZ3nf58QqwkMymVr1i0GEknz0CtUEJXp7N1kwhpkYeXJzw8PaFRqSUp39ShHA4TZLYtXwO1QmnrZrgkg16P/Zu24+ZHaYI826D86GxqKqp4wtET2LNmE07uO1x/Opu+VBEH4ebmBg8v6YKMqRwiyFSWlvMdq9bZxfT99kAQBIRERiA0KgJJJ05LvgPknOPUviOYevtN3Mffj46qxPYcdCvUqNR85z/rsXnZKpQWFkNXp3PJCwmIY5O7yeHh6QnGmETHH9M+4A4RZHat3og6bS2N0gcgyGToPXQgHnvrJZw7ehJpZxMlnxmYc47M88koys1Hl17dJa2LXMlBj9nkIhqVmp87egL//vQHUk+fk2wyMSkwxsAYgyAT4Bvgj4DgIFSUlEFRVW3rphEbEWQySVfCNvWiRLsPMjWVVfzYrn0u3+3KGINMLsO1996G6fffgYDgIGYwGLhvgD8qS8skr1+r1mDzn6vwxLxXJa+LEGeiqlHyH979FEd37kOtRqJJxCyFNawr3vB/xhhi4jtj4OgR6DdyCILCwyB3k+PHeZ/hxJ6DNm6shTD6smCq+nnSpOtJdPf0NOn+dh9k8jKyIeW6Do6AMYaI9u1w65MPYsz1Uy985qI6xLCu/XvzI9t2W+X12b9pO2569D4eGRtNn3tiU46yAR7ffYD/+N5nKCsotvt9mNzNDcHhoQiLikT7uI7oPrAfeg7qh5DIK5dvkcnl9v1kiKS4KMKgN1hqgv1LMMYQGBpk0mPsPsjsWLkWWqmmQrZ3DJDL3TB2+lTc+PDdaOqqoRkP3oljO/fBoNdL3hxdbR32bdiKWx67X/K6CGmZ/UeZfRu28cUffomaiiq7CzGMMQiCAJmbHHF9eqD/yGHoMbg/gkJD4Bfoj1bHwtn/y08kJIoiRIMeFlsr6DJBoSEm3d+ug0xBVi4/uHmnrZthdUwQ4OHpgR4D+2HGw3eh95CBze42uvbtxeL79OBJJ89K3i5RFHHm4FFMvfNm7kuDfglp1salK/kvH30F0WAf88AIggC5mxuCwkMREhGG2Pgu6DWkP3oO7o+AkGD6LBOTcJHXj/OSpksGgWGhJj3EroPM1r//RZ3EA1ntBWP1J2plMjkGjR2JKbffhPg+PWDM0gAjpk5A8ukEq6yknZWUiqKcPElndiTEkf214Ee+9tdlMOhtN6C3cQkHxhi8/XwxaOxIDJs0FjFxnRAUFgJPb28KL6TNRFGUbMA6gxP1yFSUlPGzh465xKWJnt5eCI2KQN/hgzHljpsQ3amDSTuZ7v37wj8oENXllVI18QKtWoNty9dQkCE2Za9H4R3/rOervl9i06uS3NzdERIZjtj4zhg2aSwGjR0J3wB/e33JiAPS1dXVX0ksAcYY2nWKNekxdhtkMhKTUZidZ+tmWBxjDEwQIJfL0aFrFwwaNwrdB/RBZEw0QttFtmln06V3d9a+c0dujXPxIuc4sGk7bnnsfh4aFUE7R0Ia5KRm8BWLFttkBWpBEODj74sRkydg0LhRiO4U2+SYOkIsoTivALVarSRlu3m4IzIm2qTH2G2QcbTTShevxtt4moiBQe7uBg9PT3h6e8HHzxfRnTugx8B+6Dl0AGK6dLLYjubqmTOQePy09HPtcA6tWoO967fgxofvkbYuAqB+WXtyGTs7RCuqqvnCNz9AaaH1rk5iAoO7uwfC2kVg0PjRmHLbDQiPjrKzV4Y4o8zEFKnG+cI3wB9+gQEmPcYug0xGYjI/c9AOTis1hJHLb2vci8pkMrh7uMPDqz6oeHh5wTfAH2HtIhEeHYWw6CgEBAXCx98XfoEBCAoLhae3lyQ7msHjr0JYVARKC4qsMtPvid0HMemW6dwvMIB2nBLT66S/Is3x2Ndmt+qHJchISLLKPqvxiqPewwZhyh31Y+mCwkLt6wUhTi0jMVmysn0D/OET4GfSY+wyyGxetgp6nW0XTvPw8oR/UCC8fLwR2i4SsV06IaZrZ8TGdUZ4dFTrlydamae3Fxs1bRJfvXgpuMTn5znnyEpORVFOvsnJmZjOGpfWk7YrzM7lR7btsUpPjEwuQ3h0O8x84gGMuW6KXe2DiOvITEqRrGz/4EAEhYaYtG3bXZApysnj546esnq9jDHIZDK06xSLAaNHoOegfoju0hEBIUHwcpAR/v1HD8PW5auhNHEJ9LbQqNTYs24z4vv2lLwuV+fu6Ym6Wsc5zepq9m3YZpWeUJlMhrHTp+GWx+6nU0jEZrKSUrmqWiFJ2YIgtOlCErsLMqlnE1GSX2i988yMwc3dHZGx0bjt6UcwbOIYh91BdOgah7B2kVDVKKzy+u1evRE3P3ovDzQxPRPT+Pj5WiWcOhQ72eLKi0r42l+WST7A183dHdfcPRP3PP+EnTxz4qqO7Ngj2fbOBAH9Rw41+XF2F2S2/L0aopUuXWSCgI7d4nDNXTMxePwoOPp4D19/PzZ04hhurSUdtGoNdv6zATc+QoN+peTjb9r5YmI9O//dAK1aLWkdTGCYcOO1NKM2sTm1UsXPHjohWZAJDA1G5zYsTCxI0JY2Szh8gqecSrBKXR5enrj+3tvw7pKFGH/jNczRQ0yjq2dOh4eXaQtutZUoiji6ax9UNQq6rEZCPv6+tm6C3bliEL6NnDt6UtLeGCYI6NSjKx558wXm5eMYp7iJ8yrJL0BRTq5k5fe/alibLoixqyCz4Y/lkvfGMMYQFhWBWXNfwr0vPsWkuorIVgJDQ9jwyeOtVl9BZg5y07OsVp8rkrJHhnMOzp1/0kkpFOfm87LCYknr8A8KxAMvz5a0DkKMdf74GdRUVklStkwux5DxV7XpsXYTZHJSM3j6uSRJT4kIgoCg8FC8+PUHGHO98474HzVtEtzc3a1Sl1qhxIHN261Sl6uSMsiIIodooCDTFqWFxSgvLpGsfMYYOvfsih6D+jntvoo4ll3/bpBkf8EYQ0T7doiN79Kmx9tNkDl76BiqyyskK58xhr4jh+CdX79B557dnHrH0L5zB0TEtLtkkj6piKKIfeu2orqikk4vScTHT8IgYzBAV2fbqQ7axA4+wTmp6ZLO8SPIBEy+9QbJyicXscK+0tFtX7mWZ5xPkaazgQFxfXq0+Wo8uwky21eulXSRtcgOMZj90VxExkQ7/RYbGhXBeg7qZ7X6lNU12LNmk9XqczVSBplajRaqGmkupXR2ZYXFks6k7ePnhyETRjv9/orYv8rSMr7hjxWSbe+MMYycMqHNj7eLIHNkx16el54lSdJjjKFj9zi8suBDh78qyRSTZs6ATCazSl2ccxzcsguKqmrqlZGAqbNcmkKv06GipFSy8p1ZeVGJpItH9Bo6UMLSCTHeib2HUJCZI9kxOjw6CoPHX9Xm47NdBJnVP/8h2Qskk8sxa+7LJq8o7eg69+zGug7obZXTS5xz5GVkIT8zR/K6pGSvg159JR7sW5TriIuz2v7jXF5cKmmPTI+BfSUrmxBTrPj2F+gkWvuQCYLZ6/bZPMiknE7gUiU9H38//O+zdxDft6ft93o2MPGm6yF3s85UQWqFEkd37JW4FgnfRg67HSvi4yfd5dccHIVZDhhk7OATXauRZvXfRl4+3pKWb7esNBkqaZ1WreELXnuPlxUUSVZH+84dMGD0cLPKsHmQOXPgqCSzlgqCgLHXT8VQB56p11xd+/VGSGS41erb+c86qFVqyfZCgiDd5soBKO10rIi0l18DyafOSla+M/P285G0fDcP61x5aG9E0ToTopLWHd62Gwc2bZfsamJBEDBgzAgEh4eZdZy2aZDRKFV87/otkrxInXt2xQ0P3WXxch1JVIf2rFP3rlY5vQQAyholdqxYK1n5MrmUY344lFX2uQyAj58vBKnGO3GO6ooqHNu136G+BtvDtxMfPz9JG6JVa6Qr3I5JedEHMV5awnn++xeLoJNwnTcffz9MvPl6s8uxaZDZv2k7inLzLVsoY/D288XsT95GUDgtbT/qmkkQZNZ5m0WDAXvXb4FGqZLkoOjtK+EMtxwozrPwtmghHl6e8A3wl64CzrFj1TrpyndSPv5+ks4wnJWUKlnZ9kxXp6PpHGysrLCYL3z9A1SVlkvWG8MYw/QH70S7DjFmf4hsFmQ0KjXf9OcqGCw8k6/AGCbcdB2iYtu7fIgBgP6jhiGifTur1VeSX4BMiXbA/sGBkpQL1A96TTl9TrLyzeHm4Y6g0GDJetY46g+axXkFdPAwgdSnbdMSkiQt315xzlGUY59fKlxBWWEx/2HeZ8hNy5A0xHTq0RUTb7zOIuXZLMiknjmHkrwCWPL6RcYYPL29cP29t1muUAfn6e3Frp45w2r1qRRKHNu1X5Ky/QIDpDuYc47c9EyUFhTZ3cHczd0dgaEh0lXAOSqKS3H20DHp6nBCcX16SDpuKyclDdkp6Xa3PUqOcxTlOOAAdCdQWlDEP549Byf3HpR0ln0mCJh2583wDw60yA7dZkHm2K79Fj8H7OHpicfeeQUhkeHUG3OR/lcNR0BIkFUGFnCRY//GbZIsJOnh5Qk3dzdLF3uBqDdgtx1O7Oft68MCQ4MlnX1Ur9dj3ZK/qUu/kREvdUhEuKSn/PQ6vUue8uOcozCbgoy1FeXk8+/e+hhZ51MlXbZEEAT0HjoQ42+81mI7NJsEGa1aw/dv3GbRxMcYw8AxIzByygQKMZcJjYpAh65xVlkxmDd8u9+3YZvFy/by9oant3SXpHLOcWjrLpQXl9rdwTysXaTk715BZjaWL1wscS0OwMjA6B8UCP+QIMmaIYoizhw8irLCYrvbHqXEOUfm+WRbN8OlJBw+wT944gWcPnBE0tXcASAwLAQPv/4/i5ZpkyCz+c9VqKmosmiQkcnlGHfDNRYrz5l4+XizoRNGW+3qJQDYsWqtxXtlfAP86gdYSnh66f/t3Xd4VFXeB/DvuTOTZJJJLyQhhBBqaKEZIKhUkWpFLAiyogsClgUXwcKLIrura8EusqyuKIgUwQVEpElHCD0JhPReJpPJtExmMve8f0yI6BpSmDsl/D7PE0h4wrn3zm3fe+4peRmZ2P+d+z0FR8bGSF6jJooiDu/YjdMHj7n9jVPKY5ld8+f1hLYLZ2ESt5MpysnHD+s2SboMd2MPMldQXlTi9sehpzPq9fyHrzfxt/7yEopzCyR9nQTYa2Mmz3gQ0XGxDj2BnR5kqiur+O6N2xz+gXXr1xsDbh9KtTGNSB4/Gt5KH6dMjna1sV7u5UyHlqsKDIBKwuH6Afursa1rvsbeLdvd6iIa2zXeKTVqRr0Bq5e/jeLcfLfafqdqwTnS/7ah0nWNB8BFEbvWbcHx3Qduqv1hqNYh4+xFV69Gm1ZVUck/emkF/vPPD2HU6SUPMWAMQ8aOxBgJ2mw6Pcikp5xDVYXacQUywEepxKwlzzmuzDYoIDiI3X7XOAhOqpUxGow4d/QXh5bpF+DPnDHAX22NGevfW4Wju/a5zc0jvmd3Fihhz6WrOOeoKCnFP+a9gNzLmS7d/srScrf5/BuTNPp2+Kqkfd1pqa3Fl29/hNSTZ9z+83AUq8WCHzd8B5PecNNss7NUFJfybf9ex5+b/AhO7juMOqtV8hDDGENc9y54cunzUPr5Ovwi5vQgk/LzEVjMtQ4rjzGG/rcPQcfuXag2pgkj7x4PH1+lcxbGOQ7t+MnhxfZOGiB5rRLnHFq1BquWvYHNn33JzaYat7iYDr1jhHNeD3KOkrwCvLPgZZzcf9gl2/7dv9by9R+sdsWiwVjz675C24WzoWNbP2tvc3DOUV5YjA+WLMeZQ+7/2s8ROOe4dOY8Plv+liQdB25Wu9Zv4a/PXoB1762CUW+QvhYGABiDIJPhkedmwz8wQJILmFODjFZdyU/9fNShZcrlciSNHu7QMtuqyNgYxHaNd9ryKkvL8dPG7x16pgwYngy5pCP8/sqoN2DDB6uxYs5CnD920uWBZui40ZDJnTN31tWeI+8seAWbPv2Cq51QO1KYlcu3f7mBPzX2fv7N+6uhq6xq9HdFUbrVEQShRWF55H0T4auSdroCwH4+vb94OXZv2MpdPdO8M54auchxdNc+rH3nY7dsgN98rl31wuxcvvPrTfzZSQ/zNX97F8U5+bDV1Tlt+X7+KsxZtggDbpOu6Ydzror1tqxeC6OD51Xy8vFB76T+Di2zrVIFBrCufXvxy2cvOiWJc1HE7g3f4Y4H7nJYmRHRUSy+Vw+e4aRtEEURl86cx1vPvYSuib2QNOp2njTqNpeMGh0T3xHt4zs6bcRXzjnqrFZsWvUFju7ai6F3juITp0+Fr8rPYdtuNtXwtJSz2P/dDmReSIemXA3RZrPfKa+zFC5hzwq5Qt6imq+Y+Dh0S+yFc0dPSnpMcs5hqNbhizfew5Ef9mDqvFm81y39XVITzSQcP+daos2G/d/tRNaFdIx75H4++v7Jjt9eziXtqVNjrMGqV//JR947Ad369nLK/jLo9Dz1l9M4tH03slIvNZxXTqmBuYZMLsc9j09zaFfrP+K0IFOUk8cPbN3p0AOGMYaEgYkIDqepCJorcVgSdn690SnzmXDOUVZYjHNHT/LE5Fscto+Gjh2JzAvpTnuq4CKHyWDEuSO/4MLxFKxb+SkGDE/m/YYNRocuneCr8oOPrxJyLy+oAvwlOxZVgQEsMTmJ52VkSXojvxbnHHUWK/KvZKMwOxe71m3GsPFj+OA7hiMsqh38/FVQNbO62KjTc7OpBvpqHfIzsnD2yAlcOJECnaYKok38zUWWgV33ZilyKYOMAoLQ/N3oq/Jjo+6fzC+cSJH8vLK3mbEg7dRZvD57AQbclszHTJmM2G7xCG3nuPGzzKYabjIYYNIbUVZQhJSDR6EuKcPc119EUGgIk3S6kN+x1dUh93ImVr36T3z/+Xo+bMIY9L9tCHz97Oedt68ScrkcPr7KVm2/KHLYrNJdS2x1ddizaRv2b9mO9vFxfODwZPS7NQkhEeFQBQXe8DXDbDLxGmMNDNU65GVk4eT+Qzh/9CRMegNEUXR6eAEAMAa5Qo7hk8fh3ienS35/dlqQ2bv5vw6f9l4QBNw+aaxDy2zrOiV0gyAIsME5E7OZjSbs2bQNicm3OKzMxOQk7PjyW1SUSDe1fGNEmw1GvQGHtu/Goe27ofD2QlBoCPyDAu0XVaWSe3l7/eaJnnMOL29vPPHKQvj5q27opB557wT8uH4zzA4+l5pDtImo1lRh59cbseubLQiPjkRIeBgCQoJ4REw0gsNC4OXjA28fbzBBQI3RCKPOAEO1DurScuiqtNBXaaEpq4DJYGzyAnu9hunS1sgowFjLahyS7xzF9mz6nl84dso5tZ2cw1prwYk9B5Dy8xFEd4pF557deefeCYjv2Q3dEnu3+DjLvJDOcy9dQc7lKygrKIK2ohJVag10mioEhAThxU/eQlBoCAPs0zMwxpx2k+Scg9tsKMrJw7cfrcHmVf+Bf1Bg/VcAvLy9wQTG7QGY2ds5MQaZXI7pC+eiXYf2jX4edVYrdJoqaWvTRI46sQ55GZnIy8jE1n9/jdB24QiPjkRgSDCPiIlCVMcOiO7YAYFhofDx9YG3jxKqwF9Djlat4SaDAUa9AbrKKhTl5KEwOxeVZRXQaeznla7KscOatJZMEDDi7vGYs+wFp1QyOCXIVJZV8H1bdsDm4IuPIJOh362DHVpmWxcYEszCo6N4cW6+U5YniiJO7DmIS6fP8x4D+jrkoO7QpROL79Wdq0vLXH7SWmstqCgpg7qk7Nd//N1W+vn7Y8Hbr91wiAGAmPg4dtfj0/jGT/4NLmE7kaaINhvKC4vt04wwNNk1nIM3NBVo7j67Xo2MlNsu91KAtaBG5qoZC+dh+ZN/QbWm8bY9UqizWlFwJRsFmdn2kakZIJPJeFyPrghtFwFffxV8/VXwU/lB6ecLg84ArboSWrUGVepKVKs1qNZoYLOJAOf23XTNPpIr5Hhg7uPo3KtHw4fSsWu8/YHIwXPlNZetrg5adSWqKzV//Av1NQIPP/Pn64YYANCUq2HQ6aVYzUaJNtuv141rzx/W8MfVH7kgE+prVq4poP6Ha/eVq6+FV3n5eCN57CinhRjACUHGZDDyj19eAYOD28YA9gHSfFU3fnO42cR17wJnBRnAftKu+du7eOnTt3hQWKhD9tf4aVNw+uAxWC3STTHfbFcv/g0///qtIJNhwrQp6DvUca/WJkybgnNHf4Gz2gk1pmHZvD6oOBK7/qB3Ur7CkcvlLa6RAYC4Hl3Z0DtH8t0btko+Ourvcc5/sx9Em4jMC+nIvJj+25DJ8D+B8nrHEGMMicOScOv4Mb/594SBifDy8UaN0eTQ7WipxtadMWDg8GEYfV/TkxJePuei8WoaQuP1zx9XhcXW8PL2xj2zpmHq3FlOvS9L3mLrx2+24OKJ05KUrfDykqTctk4u4XxFjcnPyMLOrx03QmnvpAFs5L0TWvXk7CyCIKDvkIGYOs+xJ7UqMIDdO+tRe82BE0drdrbr7VuT0SjZcltbIwMA989+DOHRkU4ZeLIpnHNw0d6QteHL9uv3nPMmQ0xYVDs89eqS/2kHFRQWym6ffKfk29AajDFEREdh1ot/gV8z2p8c373fGavVpjHGoPTzxX1/nuH0EANIHGTOHjnBt3+5QbJEqZegludm4Oi2Ss1hs9mwa91m7N+6w2GP7hOnP4iI6Ci3vJkzxtClTwLm//0VScofNPJWNmnGg2657Y5yvVoRo4SvAuQKRasHjgwOD2PPvLEUQaEhzumjLCFffxUeW/Q0AkOD/3BL7pn1KAJDpJtrqrVC2oXj6b+/guDwpmt/s9Mu8+w0mtfpRjDGEBQWij8v/SumzJnpkqNesiCTfyWbv/nMEug0WqkWAYu5FiV5he7xYtCDZKVecslya4wmrFmxEpdOn3fIPmvfKZZNePQByJw0rkyzMQZvpQ+mL5zX0DhSCtOem8N63tK/zYaZ622WUW+QbLkKhfyGuhd379eHTZj2AGQyp45u4VCCTEDS6Nsx5I4Rje6F8OhINmTsCPu4O25CrlBg0oypaG57vP1bd0raY6mtE2QCuvRJwN+/WY3bJo112YVIkiOwvKiEr1r2JqwWi8QtwUXs2fS9ZOW3RXmXM7lWXemSZXPOUWuuwZoV76AgK9chB8bE6VPZuEemOG2guObw9fPDU68tRsLARMlP7McWPY2ouA5u8SrDsRrvfq2v0nJrrXRto+QKRau78l5135+ns8mPPQSFC17j3jDGkDCgH6YvnNvkr06cPhX+QYFuEaYFQcDYqXdj8mMPN2tlSguK+JlDx92mkawnYYzBy8cbk6Y/iOdX/g1hkY7r+t8aDg8yFUUlfOnM+bh89oLkvSpEzvHzth8kXUZbc2TXXog25zZEvBYXOXIuXcHSGXNRkJnjkANkyuyZ6DNkkFs8GQoyAWMfvAfDxo9xyondqUdXtvw/HyOifaRb3EwcSWjk1VK1RgspR0uVKxwTPh5d8BQbNn6MpJNKOhxjCAwJxvTn5yIgOKjJAyo6LpY988ZSeHl7O2PtGnV1TLGp82Y1+/9s/Pjf9l53pEUEmQzB4aF4+m8vY8Zf57PQduEuv/A49MpfkJnD33vhVaiLnTS+B+cwGgw48sNeitTNoFVr+JlDx53eo+KP6LXV+PDF15F5Mf2G950q0J/NeXURksYMd/nNvM/gQZj82INOXWZgaDCbv+JlBIaFOHW5UmtsX2orqyDlQ7S30sdhZT26YC5G3z8JMg8JM4wx3P34I+jSO6HZJ1JichK7e9Y0lz5IBIQEYcbz85s9OOOu9Zv5oR273eJa6El8VX6Y8OgDePWLDzH0zlEuDzBXOezISzt1li9+6Emnd2Wrs1ix86uNTl2mp9q/bSfyMjJdvRoNstMu4+VH5+DUz0du+LYUFtmOzVu+BEPGjnDJTYMxhpj4OLyy+l0WKGG7mMb0HNSPvfHNvxDTOc7lYc5RGus5pNNUQcok4xfg77CygsJC2Oz/W8QmzXzI/dpy/Y4gCBgyZjjumtm8VzPXmjr3cXbrhDtcEma8lT5Y8PZydO7do1nrfeHEab7uvc8kna+rrZHJZOjQNR7L136CmYueZlEdO7jVRcYhR91PG7fxlYuWwWI2O32QLs45rpxPxXf/WktH5XWc3H+Yb/rkc5cOovZ7nHPY6mz49JV/YPuXG7jZZLqhlVOq/NhTry3BtL/MQUhEmNNu6Fe7Hs5c/IxTlteY0MgI9sIH/8CwCWMgk7dsviB3w9B4kKnWaCR7scTqX6042vQFc9ljf30a4dHu+QqQMYaouFg8/OyfW13GM28sZeOnTakfGdk52yjIZJg4fSqaO+fUvi07+PsvLINJb5A0DLcFjDHIFQp0S+yFxxY9jde++BAdu3V2v4MXNzggXo3ByNf8fSUO79iNOhe2/BZFEd9+9G+ER0fyWyfc4ZYftCuVFxbzr975GBZzrds1bOOcQ1upwdq3P0LGuVQ89dpirvTzbfU+9FX5sbv+9Aj6DB7EVy5ahpL8QnCJ5xsRBAF/Wvwc+g0b7PJjL6pjB/bcm8vQvlNH/t3qtbBarU6bl8khmL1tjFLlh0EjbvvDX5GyRsbelVSaV3QTHn2A9U4awFfMfR5V5Wpw8frjuDiTIBPw4LzHER0Xe0PH8J8WP8tCIyP4upWrYKurk3T7GGPo2icBjzw7u1nrvHXNV3zTp1+4ZPgJT8KYvaG9f2AAZvx1PobfNc7l17WmtDrInD50jG/8+HNkXkxzi6d8q8WCdStXIbRdBHdGbxFPkXvpCv/0/95AUXaeq1flumx1Nhz7cR8Ks3Lw4Pwn+OAxw29oH3bq2Y29t30dfvzmO75/607kpGdIMsmkIJPhzofvx8h7J7jVMffAU39iCQMT+c6vNuL0wWOos1pdvUpNYowhJCIMg+8YgTH3T0ZsI09/2soqaWtkQqVraxTbrTN7d+tXfMfaDdiz8b+oLCuXbFnNJcgETHrsISSPG+2QY/iumQ+ziPZRfOMnnyPvsjSvshljiO3WGQvfXdGs3zcZDFwVGIDkcaORnXoJhdl5HnFOOJvCS4GufXph2IQxuHXCmGYNKOgOWGsS8/r3PuM7vvoWtTVmt3miAOwHt4+vEkvXvIeufXp6xA6QUml+EX/zmcUoyMr1mKdyxhgUXl4Yee9EPLrgKdxI7cxVZlMNTz99Hmvf+ghF2bmOmxGWAR27dcGyNe/DPzjQbY+3U/sP88+WvwWtutKlPdYaIwgC5F5eGH3fRNz7xHSENNELYtnjz/DUX05Lcu2RK+RYvvYTp1w/9NU6vvatj3Bo+27UWa0uuZYyxtAtsRcWvf+PRge+a60ag5Gve/8z7Nn4vWO3jwEymRxLPnoT/W5teS1ojdHEqyoqcXTXXhzdtRfFuQX2a4KrZop2MUEQ4OXtjUGjbsVdMx9GfM/ubnsta0yLgkxOegbf/uUGZKVeguim8z8wJqBdh2hMXzgPHbp08rgd4iiF2bl8/XufoTDbc0LMtQRBhthunTFpxtRWzeTbmJSfj/JTBw6j4EoOCrJyUGM0teoCxhhD+/iOWPzhm4iMvf6kdO6gqqKSn9jzM1IOHMGlsxdgNtWAc1HKXsyNslddM3j7+KBbYm/0HToIt4y6HdFxTTcgNJtq+ML7ZqCsQJpuswovBd7f8Q3CoyOdtk+vnE/jR3/ch7OHj//mpiqlq/tAFRCA51euQM9B/STb3gvHT/F9W3bgzJHjMOkMTU6N0BRvpRIPP/MkJs140CHrXFZQxLPTLiM7PQNF2XkoyS1AeXGpfRy0NhhuGGMQBAG+ASp069sbfYYMxMDhyXC3Brwt0aIgYzaZuKXW4pKLX0sFhDQ9BkJbp6vSOnwuP6di9jE9fFV+Dt+XJr2B1xhNOHf0Fxzc/iMun7nQMPsvcP0J9eyNe/3w7BtLMXDEMI86zsymGl6aX4jvP1+PkwcO29sL1N9Yfj/rsUNcndmXMbD678PbR2HUfRORfOdoBIWFtGjwudL8Iv7KjLmoqlA7dj3refv44OuUvS7Zp/qqap6Zmo6fvt2GM4eP2yfG5Lxh5vDW7J+GRresfupIxiAwhsiOHTBs3CgMHTcaMfEdnbK9ZYXFfNe6zdi7ZTvMppqG4w5oxszN9evPGMOo+yZhzqvSzaysr6rm1RoNzh87hV/2HcSl0+ft7Zl+tx8kOV8c7Or+Z8x+DioUCiQMSsRtE8eiz+CBTdZ+eopWvVoipK3Rqit55oV0FGbnoTS/EJpyNaoq7F+6qurf1EAqvLwwZc5M3D/7MY++COi1Op6echYXTqQg73ImKopLoSlXO6wtkSCTISgsBO1iotGuQ3vE9eiKngMTb6jqOv30Of7GvBdgkGiupdiu8Xhn61qX79eqikqefvocctIyUJybj4riUuiqtDBU65r1Sl+ukMM/KAgBwUEICA5EcHgYYjrHIa5HV8T16IKQCNfdwHQaLU87dQapp86iMCsHlaUVqKpQNzqTtsLbCwHBQQiJCEN0XCwemv8EwttHOW39a4wmXpidi6LsPBRm5aK8qBiVZRXQlFVAq9bAapFulOkb4eXtjZB24QiPjkRc9y5IGNgX3fv3RWCIY18hugMKMoT8gau1j5baWhh1BpTkFaA0vwilBYVoFxONe5+Y3qYuBkadntfWmGEyGpGVegmXzlxAcU4+1CVl0Ko1sNnqrj6K/u5/MjDGIJPLERQaguhOHdCxexfEde+CmM6doArwh4+v0mGNBo/+uI9/uOR1WGprHVHc/xg9ZTKeenWx2+1bXZWWWy1W1Fmt0GuroSmrQK25FhazGbXmWsgEGfwCVfALCIAqwB/+QYFQeCkg91JAoVDA11/ldtsE2GtGLbW1qDXXwqg3oLpSA51GC0EmwEephNLPD6GR4fDy8YGXtxf8g9yjLZqhWscttbWoMRiRfyUbGefTUJiZg5L8QlSVq2Gz2RpeoXHOf1P75Aj2Gpb6V4T1X3KFF+J6dEH3/n3Qo18fxHaNh5ePN7yVPvBVuef+dxQKMoSQJlWUlPIagwli/QVaFEX7KzaVH1T+/k5r7Pz9F+v5V+98IlkbvXkrXsLIe9yrBxrxLCaDkVdVqKEpq2iouaksr4C+qhpWiwV1VivqrHWoqw+mdVYrrFZrfU0ogyATIMhkEAQBsvq/BZkAmVwBpZ8SSj9f+AcFIigsFEFhIQgKC0VIRBgiY2MkeQ3vCdxnpj1CiNsKj3Je49frKcrOlbRdQo8BfSUrm9wcfFV+zFflh/adOjb6OzUGI7fZRIiiDaLNBpvNBtEm/lrDIjAwJjR8LzB7mPGU7tDORkGGEOIxrpxPk6wXSWBoCAKCgyQpm5BrKW/SmhOpuH66YEIIaQZNWQUvzs2XJMgwxhAeHekxkzsSQn5FQYYQ4hFO/XzE3iVZCowhKrZ9i7qCE0LcAwUZQohHOLR9t4RTE9hHaSaEeB4KMoQQt5efmc0Ls3KlmywSDPG9uktSNiFEWhRkCCFuL+viJdQYjZKVzwQBnRK6SVY+IUQ6FGQIcXMmg5HvWPstN2h1N+2gT2ePnECd1fGzlwO/TpzoLoOtEUJahoIMIW6uxmDEts/X4YMXX4OmXH3ThZminDx+9tBxycpngoDhd42TrHxCiLQoyBDi5iqKS1FVrsaZQyewevlbqCwrv6nCzIYPVsMk4WslVWAAho4dKVn5hBBpUZAhxM2dPnisYVqAlANH8Pen/orzx0/dFGEmPeU8P33oBLgo3eYmDOjrtnMREUKaRkGGEDd3+tCxhu9FUUReRhbeXbgUpw8ea/Nh5scNW2AxmyUrXxAEJAzqJ1n5hBDpUZAhxI2VFRTxopy83/wb5xx6bTX++dyL+HrlqjYbZo7t3sd/2XMQoihKtgy5QoGeAxMlK58QIj0KMoS4sSsX0hodzdZqsWDbmq+w5KEneF5GVpsKNNlpl/kHi1+HpbZW0uXEdI5DfM/u9FqJEA9GQYYQN5ZxLhW8sRoJbn/VlJl6CSvmLMTatz/m6pIyjw80em01X/vWR7BaLJIuRyaXY+aipyVdBiFEehRkCHFTZlMNL87Ja3KSRC5yaMoq8N8v1uPVWc8i4+xFjw0zem01f3XWs0g9eUayWa4B+9gxPfr3Qc9b+lNtDCEejoIMIW7KoNOjoris2b8viiJK8gqw9E/z8cGS5Tz1l9MeFWhK8gr5ykXLkHc5U9J2MYC9NmbY+DGSLoMQ4hxyV68AIeSP6au0UJeUtvj/1VmsOLh9Nw7v/Ak9BvTls15agNgu8W5d83DxRAr/x7wXUGs2S1oTc5WPrxJJo2+XfDmEEOlRkCHETaWeOgtrK4fl56IImwiknTqHJQ89icTkJD507Ej0v20IVIEBbhNqslIv8Z++3YbjPx1wWogRZDLc/fgjCAoLcZvPgRDSehRkCHFTZw8fb7yhbzNxUURtjRm/7D2IlJ+PIigsBGOn3sPHTLkLgaHBLruR67XVfNe6zdj+5QaYDEanBBgAAGPo3Ks77n1iOoUYQtoI5rQLCCGk2UwGI5896h7UGE2SlO/l443u/fqgd9IAJAzo65RGrxUlZfziiVM4c+g4zh87BUO1TupF/g8vH2/MX/ESkseNpiBDSBtBNTKEuKGsi+molXBEW4u5FhdPpCDt5BnIvRTw9Vfx3kkD0HfoLeg9eCDCo9o55Eavr9bxlANHcHjnT8g4lwqLuRY2m815NTDXYgw9+velEENIG0NBhhA3lJ5yDpD4Xs85h81mg63GhtoaMw7v3IOjP+yFIJMhLDKCx3TphJj4OIRGRsDHVwkfpRLevj72v5U+UCgUsFgssJhrUWuuhcVshqFah8qyClQUlaAwOxcFmTmwmGshiqJrwks9xhiCI8Iwe9kil60DIUQaFGQIcUPZaZedfuPnoggbAJvNhpL8QpTkF+LkvkNgjEGQCRAEGQSZDDKZAEEmA2MMXBQhXv2yiairq4No++ORiF1JrlDgnsenoV1MNNXGENLGUJAhxM1oyip4RXHLu11LhXMOW50NNrhfQGkOJggYMnYERt030dWrQgiRAA2IR4ib0VfroC4tc+mrmLaCMYbeSQPw5MsL4ePrS7UxhLRBFGQIcTMFWTkw6gyuXg2PxxhDePsoPLpwLnz9VRRiCGmjKMgQ4mYuHk8BY3TfvRGMMXgrlZi9bBE60+zWhLRpFGQIcTMDhicjpnMnCjM3IDg8DM++sRSJQ2+hD5GQNo4GxCPEDVUUl/LNn/0HP2/7AXXWOmov0wJBYaFY8PZr6DmoH4UYQm4CFGQIcWOHd+7h//1iPQoyc2C1WCjQXAdjDJGxMZi7fDESBlKIIeRmQUGGEDdXranix37cj28+WA2jTg8OLvlgeZ5GEATE9+yO2csWoVNCNwoxhNxEKMgQ4iG0lRq+buWnOLn/MPRV1a5eHbfh669C8rjRmPbcbPgHBVKIIeQmQ0GGEA+TcS6VH9i6E/u37oCtzgbxBmfI9lRMYIjq2AEznp+PQSOGUYAh5CZFQYYQD1WSV8g3r/oCF06kQKvWQHTVZIxOxgQBvio/JAxMxKyXFjhsgktCiGeiIEOIh8vPzOan9h3Czq83o1qjATjaZKBhjEGuUGDQiGG4Y+o96Dt0EAUYQggFGULakj2bvud7N/8XZYXFMGh1bea1k1Llhw5dOuGRZ2aj9+ABFGAIIQ0oyBDSBmVeTOcZ51Jx4qcDuHI+DXVWK0TOAQ853xljYIIA/8AAJA5Lwq0T7kDCoEQoab4kQsjvUJAhpI3LSc/g+7bswPnjJ6HXVqPGaIKtfpA9tzn/GQNjgEwmh6/KDxEx0Rg++U4kjx+NwJBgCi+EkEZRkCHkJpJz6QovzMpF5vk0pKWcRX5GVsPrJw44tcbm2ikYAkND0LlXd/S/bQi6JfZGPM2PRAhpJgoyhNzEqirUPPXkGVw6cx6Xz1yEVl0JS60Fltpa1FmsDq2xYQKDQuEFLx9v+Ch90LF7V/RNvgWJQwchpnMnCi6EkFahIEMIaaCpUHNNaTnUpeWoqlBDX1UNvbYaOq3976s/m001wDUjDF97FfFRKuEX6A8/f38EBAciKCwEQaGhCAgJQnB4KMKjIxHRPgp+Af4UXgghN4yCDCGEEEI8luDqFSCEEEIIaS0KMoQQQgjxWBRkCCGEEOKxKMgQQgghxGNRkCGEEEKIx6IgQwghhBCPRUGGEEIIIR6LggwhhBBCPBYFGUIIIYR4LAoyhBBCCPFY/w+6NLIbBzDJLwAAAABJRU5ErkJggg==" alt="OFM">
+      </div>
+      <div class="brand-text">
+        <h1>Atyab</h1>
+        <p>CAPEX Projects · Live Master Dashboard</p>
+      </div>
+    </div>
+    <div class="head-meta">
+      <div class="head-meta-row">
+        <span class="live-badge" id="btnRefresh" style="cursor:pointer" title="Click to refresh"><span class="live-dot"></span>LIVE DATA · Click to Refresh</span>
+        <span class="head-pill">Total Projects <b id="hpTotal">—</b></span>
+        <span class="head-pill">Budget <b id="hpBudget">—</b></span>
+      </div>
+      <div class="refreshed">Last refreshed: <span id="refreshTime"></span></div>
+    </div>
+  </div>
+</header>
+
+<div class="filters">
+  <div class="filters-wrap">
+    <div class="fg">
+      <label class="flabel">Division</label>
+      <select id="fDivision" class="fctl"></select>
+    </div>
+    <div class="fg">
+      <label class="flabel">Year</label>
+      <select id="fYear" class="fctl"></select>
+    </div>
+    <div class="fg">
+      <label class="flabel">Status</label>
+      <select id="fStatus" class="fctl">
+        <option value="">All Statuses</option>
+        <option value="IP">In Progress</option>
+        <option value="CO">Completed</option>
+        <option value="HOL">On Hold</option>
+        <option value="">Not Started / N/A</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="flabel">Final Status</label>
+      <select id="fFinal" class="fctl">
+        <option value="">All</option>
+        <option value="Ongoing">Ongoing</option>
+        <option value="Completed">Completed</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="flabel">Asset Class</label>
+      <select id="fAsset" class="fctl"></select>
+    </div>
+    <div class="fg">
+      <label class="flabel">Owner</label>
+      <select id="fOwner" class="fctl"></select>
+    </div>
+    <div class="fg">
+      <label class="flabel">Search</label>
+      <div class="search-wrap">
+        <input id="fSearch" class="fctl" type="text" placeholder="Project name, code, remarks…">
+      </div>
+    </div>
+    <button id="btnClear" class="btn-clear">Clear All</button>
+    <span class="rcount">Showing <b id="rcount">—</b> of <b id="rtotal">—</b></span>
+  </div>
+</div>
+
+<main>
+
+  <!-- KPI cards -->
+  <div class="kpi-grid">
+    <div class="kpi k-total" data-kpi="all">
+      <div class="kpi-label">Total Projects</div>
+      <div class="kpi-value" id="kTotal">—</div>
+      <div class="kpi-sub">Across all divisions</div>
+    </div>
+    <div class="kpi k-ip" data-kpi="IP">
+      <div class="kpi-label">In Progress</div>
+      <div class="kpi-value" id="kIP">—</div>
+      <div class="kpi-sub" id="kIPpct">— of total</div>
+    </div>
+    <div class="kpi k-co" data-kpi="CO">
+      <div class="kpi-label">Completed</div>
+      <div class="kpi-value" id="kCO">—</div>
+      <div class="kpi-sub" id="kCOpct">— of total</div>
+    </div>
+    <div class="kpi k-hol" data-kpi="HOL">
+      <div class="kpi-label">On Hold</div>
+      <div class="kpi-value" id="kHOL">—</div>
+      <div class="kpi-sub" id="kHOLpct">— of total</div>
+    </div>
+    <div class="kpi k-bud" data-kpi="bud">
+      <div class="kpi-label">Total Budget (OMR)</div>
+      <div class="kpi-value" id="kBud">—</div>
+      <div class="kpi-sub" id="kBudSub">— spent overall</div>
+    </div>
+  </div>
+
+  <!-- Financial strip -->
+  <div class="fin-strip">
+    <div class="fin-item">
+      <span class="fin-label">Budget</span>
+      <span class="fin-value gold" id="fBudget">—</span>
+    </div>
+    <div class="fin-item">
+      <span class="fin-label">Actual Spent</span>
+      <span class="fin-value" id="fSpent">—</span>
+    </div>
+    <div class="fin-item">
+      <span class="fin-label">Committed</span>
+      <span class="fin-value" id="fCommitted">—</span>
+    </div>
+    <div class="fin-item">
+      <span class="fin-label">Expected to Come</span>
+      <span class="fin-value" style="color:var(--ofm-gold-d)" id="fExp2026">—</span>
+    </div>
+    <div class="fin-item">
+      <span class="fin-label">Balance Remaining</span>
+      <span class="fin-value green" id="fBalance">—</span>
+    </div>
+    <div class="fin-progress-wrap">
+      <div class="fin-progress-head">
+        <span class="fin-label">Budget Utilization</span>
+        <span class="fin-progress-pct" id="fPct">—</span>
+      </div>
+      <div class="fin-progress-bar">
+        <div class="fin-progress-fill" id="fFill" style="width:0%;"></div>
+      </div>
+      <div class="fin-progress-pct">Spent + Committed vs total budget</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Projects by Division</div>
+          <div class="chart-sub">Filtered count per division</div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="cDiv"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Status Distribution</div>
+          <div class="chart-sub">Live breakdown</div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="cStatus"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Budget by Division</div>
+          <div class="chart-sub">OMR (filtered)</div>
+        </div>
+      </div>
+      <div class="chart-body"><canvas id="cBudget"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-head">
+      <div class="table-title">Project Register</div>
+      <div class="table-actions">
+        <button class="btn-sec" id="btnCsv">⬇ Export CSV</button>
+        <button class="btn-pri" id="btnPrint">⎙ Print / PDF</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th data-sort="code">Code <span class="sort">↕</span></th>
+            <th data-sort="name">Project <span class="sort">↕</span></th>
+            <th data-sort="divisionShort">Division <span class="sort">↕</span></th>
+            <th data-sort="owner">Owner <span class="sort">↕</span></th>
+            <th data-sort="status">Status <span class="sort">↕</span></th>
+            <th data-sort="budget" class="num">Budget <span class="sort">↕</span></th>
+            <th data-sort="spent" class="num">Spent <span class="sort">↕</span></th>
+            <th data-sort="balance" class="num">Balance <span class="sort">↕</span></th>
+            <th>Utilization</th>
+            <th data-sort="planFinish">Plan Finish <span class="sort">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div id="emptyState" class="empty" style="display:none;">
+        <div class="empty-icon">⌕</div>
+        <h3>No projects match your filters</h3>
+        <p>Try clearing some filters or adjusting your search.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Oman Flour Mills Company <b>·</b> CAPEX PMO Dashboard <b>·</b>
+  Click any project row for full details <b>·</b> Click KPI cards to filter
+</footer>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal" id="modalBox" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <h2 id="mName">—</h2>
+        <div class="meta" id="mMeta">—</div>
+      </div>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+let PROJECTS = [];
+const EMBEDDED_PROJECTS = [{"code":"PRJ0204","name":"Replacement of The Existing A Mill Plan Sifter","unit":"1","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Apr-24","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"19-Jun-26","planStart":"14-Feb-24","actualStart":"7-Aug-25","status":"IP","presentAction":"Booked vessal-shippment. Civil works-technical done","nextAction":"PO-civ; Installation & Commissioning - Q3 Aug(16 days-SD Plan)","planFinish":"31-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":362000.0,"spent":104998.0,"committed":357761.0,"exp2025":0.0,"exp2026":18800.0,"balance":-14561.0,"remarks":"Shippment add; Increased machine cost","phasing":"Q4-2026","po":"7026; 7020; 5824","pr":"Machine ordered placed. Civil works PR raised,site visit done."},{"code":"PRJ0268","name":"Chakki atta scale & additive feeders","unit":"2","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"NECESSITY","owner":"Naseef","leader":"Pavan","machineDelivery":"Received","planStart":"15-Feb-26","actualStart":"","status":"IP","presentAction":"Civil works-technical done","nextAction":"PO-civ; Installation & Commissioning - Q2 June","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":40000.0,"spent":2818.0,"committed":38578.0,"exp2025":0.0,"exp2026":1422.0,"balance":0.0,"remarks":"","phasing":"Q4-2026","po":"6638; 6556","pr":"PR# 016231-re-tendered site visit done  ; along with P9/10"},{"code":"PRJ0271","name":"Purifier A MILL P1-136/150 & P2-137/151","unit":"3","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"Received","planStart":"15-Dec-25","actualStart":"26-Dec-25","status":"CO","presentAction":"completed","nextAction":"-","planFinish":"31-Mar-26","actualFinish":"8-Jan-26","finalStatus":"Completed","budget":26950.0,"spent":22481.0,"committed":20507.0,"exp2025":0.0,"exp2026":0.0,"balance":6443.0,"remarks":"Extra shipment cost(5 projects) ,if any , can taken from this projects","phasing":"Q4-2026","po":"6636; 6544","pr":""},{"code":"PRJ0265","name":"Separator for intake","unit":"4","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"Received","planStart":"15-Feb-26","actualStart":"15-Jan-26","status":"CO","presentAction":"completed","nextAction":"-","planFinish":"31-Mar-26","actualFinish":"1-Feb-26","finalStatus":"Completed","budget":36931.0,"spent":30243.0,"committed":27336.0,"exp2025":0.0,"exp2026":0.0,"balance":9595.0,"remarks":"","phasing":"Q4-2026","po":"6639; 6543","pr":""},{"code":"PRJ0269","name":"A MILL Matador for F1 line  (For Mill A)","unit":"5","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"15-Jun-26/ hold(without storage cost -6 weeks only)","planStart":"15-May-26","actualStart":"","status":"IP","presentAction":"Booked vessal-shippment. Civil works-technical done","nextAction":"PO-civ; Installation & Commissioning - Q3 July-postponed","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":71500.0,"spent":0.0,"committed":64673.0,"exp2025":0.0,"exp2026":6827.0,"balance":0.0,"remarks":"Shippment add(negotaite); postponed due to machine delay","phasing":"Q4-2026","po":"6558","pr":"Minor Civil works PR raised,site visit done."},{"code":"PRJ0264","name":"Matador from bin 9 and 12 towards 10kg and valve packing lin","unit":"6","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Feb-25","assetClass":"PLANT & MACH","class":"NECESSITY","owner":"Naseef","leader":"Pavan","machineDelivery":"15-Jun-26/ hold","planStart":"15-May-26","actualStart":"","status":"IP","presentAction":"Booked vessal-shippment. Civil works-technical done","nextAction":"PO-civ; Installation & Commissioning - Q3 July-postponed","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":64785.0,"spent":0.0,"committed":56471.0,"exp2025":0.0,"exp2026":8314.0,"balance":0.0,"remarks":"Shippment add(negotaite); postponed due to machine delay","phasing":"Q4-2026","po":"6555","pr":"Minor Civil works PR raised,site visit done."},{"code":"PRJ0270","name":"A MILL SCALES :1st Cleaning - B1 - Flour1 - Bran","unit":"7","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"NECESSITY","owner":"Naseef","leader":"Pavan","machineDelivery":"Received(spouting/duct!)","planStart":"15-May-26","actualStart":"","status":"CO","presentAction":"completed","nextAction":"New duct/spount -July - 1 day old pipe replacement.","planFinish":"31-Mar-26","actualFinish":"5-Apr-26","finalStatus":"Completed","budget":60280.0,"spent":9523.0,"committed":49976.0,"exp2025":0.0,"exp2026":0.0,"balance":10304.0,"remarks":"","phasing":"Q4-2026","po":"6637; 6557","pr":""},{"code":"PRJ0277","name":"Air Compressor -For sortex","unit":"8","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"Received","planStart":"15-Dec-25","actualStart":"","status":"IP","presentAction":"Installation done","nextAction":"commissioning ( May)","planFinish":"31-Mar-26","actualFinish":"","finalStatus":"Ongoing","budget":30000.0,"spent":9660.0,"committed":14175.0,"exp2025":0.0,"exp2026":15825.0,"balance":0.0,"remarks":"","phasing":"Q2-2026","po":"6419;7736 ; 7809","pr":"PR raised-16715 (mithun/faiz-maintenance)"},{"code":"PRJ0266","name":"Bran bagging carousel replacement","unit":"9","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"15-Jun-26","planStart":"15-May-26","actualStart":"","status":"IP","presentAction":"Booked vessal-shippment. Civil works-technical done","nextAction":"PO-civ; Installation & Commissioning - Q3 July","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":106700.0,"spent":29166.0,"committed":91819.0,"exp2025":0.0,"exp2026":14881.0,"balance":0.0,"remarks":"Shippment add(negotaite); postponed due to machine delay","phasing":"Q4-2026","po":"6545","pr":"PR# 016231-re-tendered site visit done  ; along with P2"},{"code":"PRJ0267","name":"Harees/cereal bagging carousel replacement","unit":"10","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"15-Jun-26","planStart":"15-May-26","actualStart":"","status":"IP","presentAction":"Booked vessal-shippment. Civil works-technical done","nextAction":"PO-civ; Installation & Commissioning - Q3 July","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":121000.0,"spent":26736.0,"committed":106047.0,"exp2025":0.0,"exp2026":14953.0,"balance":0.0,"remarks":"Shippment add(negotaite); postponed due to machine delay","phasing":"Q4-2026","po":"6542","pr":"PR# 016231-re-tendered site visit done  ; along with P2"},{"code":"PRJ0272","name":"Wincos to mercury automation software upgrade","unit":"11","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"Received","planStart":"15-Feb-26","actualStart":"","status":"IP","presentAction":"Installation after completion of (sortex fix In Q3-July)","nextAction":"Installation & Commissioning - Q2 July","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":129650.0,"spent":74320.0,"committed":115357.0,"exp2025":0.0,"exp2026":14293.0,"balance":0.0,"remarks":"Sortex project delayed & to be aligned with other scheduled projects","phasing":"Q2-2026","po":"6617","pr":""},{"code":"PRJ0275","name":"Bag Counter for all packing lines","unit":"12","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"15-May-26","planStart":"15-Dec-25","actualStart":"","status":"IP","presentAction":"Installation  after completion of( Bran/haree fix in Q3-Aug)","nextAction":"Installation & Commissioning - Q3 Aug.","planFinish":"31-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":38500.0,"spent":0.0,"committed":11401.0,"exp2025":0.0,"exp2026":27099.0,"balance":0.0,"remarks":"Bran/cereal project delayed & to be aligned with other scheduled projects","phasing":"Q4-2026","po":"6540","pr":""},{"code":"PRJ0207","name":"Optical Sorting Machine (Sortex)","unit":"13","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"2-Apr-24","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"Received","planStart":"15-Dec-25","actualStart":"25-Mar-26","status":"IP","presentAction":"Buhler supply-missing parts track(ETQ-21st th May)","nextAction":"Installation & Commissioning - Q3 May(20th May to till 6th june)","planFinish":"31-Mar-26","actualFinish":"","finalStatus":"Ongoing","budget":147400.0,"spent":129631.0,"committed":138586.0,"exp2025":0.0,"exp2026":8814.0,"balance":0.0,"remarks":"","phasing":"Q2-2026","po":"5487; 5498; 5497; 7755;7786;8010","pr":""},{"code":"PRJ0229","name":"Silos Cleaning and Annual Maintenance","unit":"14","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"4-Jan-24","assetClass":"BUILDING","class":"QUALITY","owner":"Naseef","leader":"Pavan","machineDelivery":"-","planStart":"15-Jan-25","actualStart":"","status":"CO","presentAction":"Opex2025-done;","nextAction":"Request sent for Budget reloaction P15","planFinish":"31-Dec-25","actualFinish":"15-Dec-25","finalStatus":"Completed","budget":66550.0,"spent":41793.0,"committed":41793.0,"exp2025":0.0,"exp2026":0.0,"balance":24757.0,"remarks":"Reloacted OMR to P15","phasing":"Q4-2026","po":"5416;6115;6401;6735; 6977","pr":""},{"code":"PRJ0151","name":"Full automated 10 kg packing (Robot)","unit":"15","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"23-Aug-22","assetClass":"EQUIPMENT","class":"INNOVATION","owner":"Mohammed","leader":"Mohamed","machineDelivery":"Received","planStart":"23-Aug-23","actualStart":"15-Jan-25","status":"CO","presentAction":"completed","nextAction":"Check with finance & update cost control","planFinish":"26-Apr-26","actualFinish":"30-Apr-26","finalStatus":"Completed","budget":465450.0,"spent":324032.0,"committed":324450.0,"exp2025":0.0,"exp2026":0.0,"balance":141000.0,"remarks":"","phasing":"Q1-2026","po":"3216","pr":""},{"code":"PRJ0101","name":"1-10 Kg Fully Automatic Packaging","unit":"16","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"1-Jan-21","assetClass":"-","class":"-","owner":"Salim","leader":"-","machineDelivery":"-","planStart":"-","actualStart":"","status":"HOL","presentAction":"Check with finance & update cost control","nextAction":"Cancel","planFinish":"-","actualFinish":"-","finalStatus":"-","budget":296936.0,"spent":10000.0,"committed":10000.0,"exp2025":0.0,"exp2026":0.0,"balance":286936.0,"remarks":"","phasing":"","po":"PO-","pr":""},{"code":"PRJ0068","name":"B Mill plant sifters- Flour Mill","unit":"17","division":"Flour Division CAPEX 2020-2025","divisionShort":"Flour","yearBucket":"2020-2025","capexYear":"23-Feb-20","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Salim","leader":"Pavan","machineDelivery":"Received","planStart":"-","actualStart":"1-Oct-26","status":"CO","presentAction":"completed","nextAction":"-","planFinish":"30-Oct-25","actualFinish":"30-Oct-25","finalStatus":"Completed","budget":448414.0,"spent":325942.0,"committed":325942.0,"exp2025":0.0,"exp2026":122472.0,"balance":0.0,"remarks":"","phasing":"","po":"7626,7639;7300; 7279;7042; 6809; 5447; 5446; 5425; 5408; 4565;3982","pr":"AMC-  supports for civ & mech inst- Memo submitted/"},{"code":"PRJ0306","name":"A & B station Carrousel Replacement /Automatic","unit":"1","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"15-Jan-26","actualStart":"15-Jan-26","status":"IP","presentAction":"M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA. Raise PR--Civ consultant","planFinish":"15-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":745000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":745000.0,"remarks":"","phasing":"","po":"","pr":"PR#017104(R1)dated 12.4.26  for M/C supplier"},{"code":"PRJ0308","name":"Flour Bulk loading station with shed","unit":"2","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"15-Jan-26","actualStart":"15-Jan-26","status":"IP","presentAction":"M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA. Raise PR--Civ consultant","planFinish":"15-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":375000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":375000.0,"remarks":"","phasing":"","po":"","pr":"PR#016645 dated 15.2.26  for M/C supplier & Consultant"},{"code":"PRJ0309","name":"Control sifter in packing line 50kg","unit":"3","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"22-Jan-26","actualStart":"22-Jan-26","status":"IP","presentAction":"M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA. Raise PR--Civ consultant","planFinish":"30-Sep-26","actualFinish":"","finalStatus":"Ongoing","budget":301000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":301000.0,"remarks":"","phasing":"","po":"","pr":"PR#016479 dated 29.1.26 for M/C supplier & Consultant"},{"code":"PRJ0310","name":"Flour Reprocess Line with scale","unit":"4","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"22-Jan-26","actualStart":"22-Jan-26","status":"IP","presentAction":"M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA. Raise PR--Civ consultant","planFinish":"15-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":80000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":80000.0,"remarks":"","phasing":"","po":"","pr":"PR#016522 dated 29.1.26  for M/C supplier & Consultant"},{"code":"PRJ0311","name":"Chakki atta 10KG packing machine","unit":"5","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"15-Feb-26","actualStart":"22-Jan-26","status":"IP","presentAction":"Tender-Technical evaluation done","nextAction":"Commerical  Evaluation,Budget reloctaion Memo-consider optional item.","planFinish":"15-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":78000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":78000.0,"remarks":"","phasing":"","po":"","pr":"PR#016476 dated 29.1.26 -awaiting proposals"},{"code":"PRJ0312","name":"Bin Repair & Coating","unit":"6","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"PLANT & MACH","class":"NECESSITY","owner":"Naseef","leader":"Pavan","machineDelivery":"-","planStart":"1-Mar-26","actualStart":"22-Jan-26","status":"IP","presentAction":"PR#016560 dated 4.2.26 for Spl supplier (pommer)","nextAction":"Raise PR-Civ consultant & Scaffolding for inspection.","planFinish":"30-Sep-26","actualFinish":"","finalStatus":"Ongoing","budget":75000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":75000.0,"remarks":"","phasing":"","po":"","pr":"PR#016560 dated 4.2.26 for Spl supplier & Consultant"},{"code":"PRJ0313","name":"Bran production line upgrade to 8 t/hr capacity + Bran bin 36,37&38 motor upgrade","unit":"7","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"NECESSITY","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"22-Jan-26","actualStart":"22-Jan-26","status":"IP","presentAction":"M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA","planFinish":"30-Sep-26","actualFinish":"","finalStatus":"Ongoing","budget":62000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":62000.0,"remarks":"","phasing":"","po":"","pr":"PR#016521 dated 29.1.26  for M/C supplier"},{"code":"PRJ0314","name":"4 New screw conveyors (Door Types) +  Connection to B station","unit":"8","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"22-Jan-26","actualStart":"22-Jan-26","status":"IP","presentAction":"M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA","planFinish":"15-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":53000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":53000.0,"remarks":"","phasing":"","po":"","pr":"PR#016480 dated 29.1.26  for M/C supplier"},{"code":"PRJ0315","name":"A & B mill purifiers to change","unit":"9","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"22-Jan-26","actualStart":"22-Jan-26","status":"IP","presentAction":"M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA","planFinish":"30-Sep-26","actualFinish":"","finalStatus":"Ongoing","budget":53000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":53000.0,"remarks":"","phasing":"","po":"","pr":"PR#016477 dated 29.1.26  for M/C supplier"},{"code":"PRJ0316","name":"Chakki atta mill overhaul equipment upgrade","unit":"10","division":"Flour Division CAPEX 2026","divisionShort":"Flour","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Naseef","leader":"Pavan","machineDelivery":"ETA","planStart":"22-Jan-26","actualStart":"22-Jan-26","status":"IP","presentAction":"M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA","planFinish":"30-Sep-26","actualFinish":"","finalStatus":"Ongoing","budget":37000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":37000.0,"remarks":"","phasing":"","po":"","pr":"PR#016478 dated 29.1.26  for M/C supplier"},{"code":"PRJ0294","name":"Micro Dosing System with new Bins for A- Mills","unit":"1","division":"Feed Division CAPEX 2025","divisionShort":"Feed","yearBucket":"2025","capexYear":"20-Mar-25","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Ahmed","leader":"Mohammed","machineDelivery":"27-Apr-26( Revised)","planStart":"15-May-26","actualStart":"","status":"IP","presentAction":"Shippment(Ex.cost-stop).","nextAction":"Installation & commissioning ( Q2- May-26)-postponed","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":110000.0,"spent":96452.0,"committed":107579.0,"exp2025":0.0,"exp2026":0,"balance":2421.0,"remarks":"","phasing":"Q2-2026","po":"6716;","pr":""},{"code":"PRJ0292","name":"PreMix unit  enhancement (RM bins and  FG cold store)","unit":"2","division":"Feed Division CAPEX 2025","divisionShort":"Feed","yearBucket":"2025","capexYear":"20-Mar-25","assetClass":"PLANT & MACH","class":"MAINTAIN CAPACITY","owner":"Ahmed","leader":"Mohammed","machineDelivery":"Received","planStart":"15-Feb-26","actualStart":"","status":"IP","presentAction":"Tender stage - commerical Evaluation for civil works","nextAction":"Once PO issue ; Installation & commissioning ( Q2-July-26)","planFinish":"31-Mar-26","actualFinish":"","finalStatus":"Ongoing","budget":192500.0,"spent":0,"committed":135058.0,"exp2025":91000.0,"exp2026":0,"balance":-33558.0,"remarks":"1) (Revised Q1-Jan with max. completion Q1-March)- 5.1.2026 ; revised PO issue date - 20.2.26!","phasing":"Q1-2026","po":"6794; 6763; 6604","pr":""},{"code":"PRJ0331","name":"Construction of Raw Material & Bag Storage Shed , 300 Sqm","unit":"1","division":"Feed Division CAPEX 2026","divisionShort":"Feed","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"QUALITY","owner":"Ahmed","leader":"Mohammed","machineDelivery":"-","planStart":"","actualStart":"","status":"IP","presentAction":"Raised PR for consultant-design","nextAction":"consolidate along with warehouse projects","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":87500.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":87500.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0323","name":"Installation of New Sifter System","unit":"2","division":"Feed Division CAPEX 2026","divisionShort":"Feed","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"PLANT & MACH","class":"MAINTAIN CAPACITY","owner":"Ahmed","leader":"Mohammed","machineDelivery":"ETA","planStart":"","actualStart":"","status":"IP","presentAction":"Raised PR #016905;M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":43700.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":43700.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0333","name":"Ventilation System","unit":"3","division":"Feed Division CAPEX 2026","divisionShort":"Feed","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"PLANT & MACH","class":"NECESSITY","owner":"Ahmed","leader":"Mohammed","machineDelivery":"ETA","planStart":"","actualStart":"","status":"IP","presentAction":"Raised PR #017053;M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA","planFinish":"30-Sep-26","actualFinish":"","finalStatus":"Ongoing","budget":20699.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":20699.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0332","name":"Installation of Safety Handrails at Feed Mill Roof","unit":"4","division":"Feed Division CAPEX 2026","divisionShort":"Feed","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"SAFETY","owner":"Ahmed","leader":"Mohammed","machineDelivery":"-","planStart":"","actualStart":"","status":"IP","presentAction":"Raised PR for contractor","nextAction":"Followup with procurement PO & ETA","planFinish":"30-Sep-26","actualFinish":"","finalStatus":"Ongoing","budget":15600.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":15600.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0322","name":"Replacement of Metal Chute with Roller Conveyors","unit":"5","division":"Feed Division CAPEX 2026","divisionShort":"Feed","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Ahmed","leader":"Mohammed","machineDelivery":"ETA","planStart":"","actualStart":"","status":"IP","presentAction":"Raised PR #016813;M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":14400.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":14400.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0330","name":"Installation of Magnetic Humps at Packing Lines","unit":"6","division":"Feed Division CAPEX 2026","divisionShort":"Feed","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"PLANT & MACH","class":"REPLACEMENT","owner":"Ahmed","leader":"Mohammed","machineDelivery":"ETA","planStart":"","actualStart":"","status":"IP","presentAction":"Raised PR #017028;M/C supplier (consolidated scope)","nextAction":"Followup with procurement PO & ETA","planFinish":"31-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":10000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":10000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0289","name":"Fall arrest system (HSSE)-FLOUR delivery area","unit":"1","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"16-Mar-25","assetClass":"EQUIPMENT","class":"SAFETY","owner":"Mazin","leader":"Tariq","machineDelivery":"No","planStart":"11-Mar-25","actualStart":"","status":"IP","presentAction":"Commercial evaluations","nextAction":"PO-contractor","planFinish":"30-Mar-26","actualFinish":"","finalStatus":"Ongoing","budget":59400.0,"spent":0,"committed":0.0,"exp2025":0.0,"exp2026":59400.0,"balance":0.0,"remarks":"","phasing":"Q1-2026","po":"-","pr":""},{"code":"PRJ0110","name":"Sun Shed for Bran warehouse and loading area","unit":"2","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"1-Jan-21","assetClass":"BUILDING","class":"SAFETY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"3-Jun-21","actualStart":"","status":"IP","presentAction":"Kick off meeting done","nextAction":"Survey area and proposing concept layout","planFinish":"30-Mar-26","actualFinish":"","finalStatus":"Ongoing","budget":236500.0,"spent":0.0,"committed":21000.0,"exp2025":0.0,"exp2026":215500.0,"balance":0.0,"remarks":"","phasing":"Q1-2026","po":"-","pr":""},{"code":"PRJ0243","name":"Warehouse Transformation Project (Egolesi)","unit":"3","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"3-Jun-24","assetClass":"TOOLS & SPARES","class":"INNOVATION","owner":"Mazin","leader":"Tariq","machineDelivery":"yes","planStart":"13-May-24","actualStart":"25-Aug-24","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"30-Mar-26","actualFinish":"","finalStatus":"Completed","budget":117237.0,"spent":59946.0,"committed":6000.0,"exp2025":0.0,"exp2026":51291.0,"balance":59946.0,"remarks":"","phasing":"Q1-2026","po":"PO-000005527\nPO-000005545\nPO-000005546\nPO-000005597\nPO-000005763\nPO-000005784\nPO-000005895\nPO-000005955\nPO-000006045\nPO-000006361\nPO-000006461","pr":""},{"code":"PRJ0183","name":"Port rented shed warehouses - Repair & modification works","unit":"4","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"29-Mar-23","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Pavan","machineDelivery":"-","planStart":"19-Jan-23","actualStart":"31-Jul-23","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Completed","budget":47600.0,"spent":33130.0,"committed":5000.0,"exp2025":0.0,"exp2026":9470.0,"balance":33130.0,"remarks":"","phasing":"Q2-2026","po":"PO-000004126\nPO-000004378\nPO-000004992\nPO-000006404\nPO-000007008","pr":""},{"code":"PRJ0305","name":"Port Silos RCC structure building integrity study","unit":"5","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"18-Sep-25","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"18-Sep-25","actualStart":"1-Nov-25","status":"IP","presentAction":"Lab rsult shared by consultant","nextAction":"Waiting for consultant final report by Mid june","planFinish":"15-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":42500.0,"spent":0.0,"committed":42500.0,"exp2025":0,"exp2026":0,"balance":0.0,"remarks":"","phasing":"Q1-2026","po":"PO-000007221\nCowi PO not done yet","pr":""},{"code":"PRJ0291","name":"Hay Al Myna New warehouse- Only design","unit":"7","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"16-Mar-25","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"11-Mar-25","actualStart":"","status":"IP","presentAction":"Conceept design approved","nextAction":"detailed design completion by july 13","planFinish":"30-Mar-26","actualFinish":"","finalStatus":"Ongoing","budget":100000.0,"spent":0,"committed":0,"exp2025":50000.0,"exp2026":50000.0,"balance":0.0,"remarks":"","phasing":"Q1-2026","po":"-","pr":""},{"code":"PRJ0290","name":"New port silo project- (Land Preparation /Mountain Cutting )","unit":"9","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"15-Jan-26","assetClass":"LAND","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"11-Mar-25","actualStart":"3-Sep-25","status":"IP","presentAction":"Contractor TE and commercial completed","nextAction":"Waiting for final awarding","planFinish":"30-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":1067000.0,"spent":0.0,"committed":55243.0,"exp2025":0,"exp2026":1011757.0,"balance":0.0,"remarks":"","phasing":"Q4-2026","po":"PO-000007148","pr":""},{"code":"PRJ0288","name":"New Ship Unloader","unit":"10","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"11-Mar-25","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Mazin","leader":"Tariq","machineDelivery":"No","planStart":"10-Mar-25","actualStart":"","status":"IP","presentAction":"Letter of Acceptance issued","nextAction":"kick off meeting","planFinish":"30-Jun-27","actualFinish":"","finalStatus":"Ongoing","budget":1431100.0,"spent":0,"committed":0,"exp2025":1431100.0,"exp2026":0,"balance":0.0,"remarks":"","phasing":"Q2-2027","po":"-","pr":""},{"code":"PRJ0239","name":"Tarpaulins & consumables","unit":"15","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"27-May-24","assetClass":"TOOLS & SPARES","class":"QUALITY","owner":"Mazin","leader":"Mazin","machineDelivery":"Yes.","planStart":"13-May-24","actualStart":"","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":5323.0,"spent":55300.0,"committed":0,"exp2025":0,"exp2026":0,"balance":5323.0,"remarks":"","phasing":"","po":"PO-000005561","pr":""},{"code":"PRJ0200","name":"Repairs of existing offices - warehouses","unit":"16","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"19-Oct-23","assetClass":"BUILDING","class":"RENOVATION","owner":"Mazin","leader":"Pavan","machineDelivery":"-","planStart":"4-Oct-23","actualStart":"","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":9200.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":9200.0,"remarks":"","phasing":"","po":"PO-000006093","pr":""},{"code":"PRJ0111","name":"Pallets washing machine","unit":"17","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"1-Jan-21","assetClass":"EQUIPMENT","class":"COST SAVING","owner":"Mazin","leader":"Tariq","machineDelivery":"Yes.","planStart":"28-Feb-22","actualStart":"","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":11000.0,"spent":8368.0,"committed":0,"exp2025":0,"exp2026":0,"balance":11000.0,"remarks":"","phasing":"","po":"PO-000002223\nPO-000002483","pr":""},{"code":"PRJ0249","name":"Port Silo topographic Mountain Survey","unit":"18","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"5-Sep-24","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Pavan","machineDelivery":"-","planStart":"1-Sep-24","actualStart":"1-Oct-24","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":1200.0,"spent":1160.0,"committed":0,"exp2025":0,"exp2026":0,"balance":1200.0,"remarks":"","phasing":"","po":"PO-000005781","pr":""},{"code":"PRJ0195","name":"Tarpaulins & consumables - warehouse","unit":"19","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"30-May-23","assetClass":"TOOLS & SPARES","class":"QUALITY","owner":"Mazin","leader":"Mazin","machineDelivery":"Yes.","planStart":"30-May-23","actualStart":"","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":2200.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":2200.0,"remarks":"","phasing":"","po":"-","pr":""},{"code":"PRJ0241","name":"Long fence Banners 725 sqm","unit":"20","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"27-May-24","assetClass":"BUILDING","class":"QUALITY","owner":"Mazin","leader":"Tariq","machineDelivery":"Yes.","planStart":"13-May-24","actualStart":"13-Dec-24","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":17590.0,"spent":11282.0,"committed":0,"exp2025":0,"exp2026":0,"balance":17590.0,"remarks":"","phasing":"","po":"PO-000005703","pr":""},{"code":"PRJ0282","name":"New Generator for Neuero Ship Unloader","unit":"21","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"2-Mar-25","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Mazin","leader":"Mazin","machineDelivery":"Yes.","planStart":"3-Feb-25","actualStart":"24-Mar-25","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"24th Mar 2025","finalStatus":"Completed","budget":8000.0,"spent":7455.0,"committed":0.0,"exp2025":0.0,"exp2026":0.0,"balance":8000.0,"remarks":"","phasing":"","po":"PO-000006434","pr":""},{"code":"PRJ0299","name":"Renovation of Ingredient store","unit":"22","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"7-May-25","assetClass":"BUILDING","class":"RENOVATION","owner":"Mazin","leader":"Pavan","machineDelivery":"-","planStart":"4-May-25","actualStart":"18-Sep-25","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":21780.0,"spent":11282.0,"committed":0,"exp2025":0,"exp2026":0,"balance":21780.0,"remarks":"","phasing":"","po":"PO-000007081","pr":""},{"code":"PRJ0193","name":"Pickup truck - Warehouse","unit":"23","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"30-May-23","assetClass":"VEHICLE","class":"NECESSITY","owner":"Mazin","leader":"Mazin","machineDelivery":"Yes.","planStart":"30-May-23","actualStart":"","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":14300.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":14300.0,"remarks":"","phasing":"","po":"-","pr":""},{"code":"PRJ0173","name":"silos horizontal cracks - 3 no's","unit":"24","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"7-Feb-23","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Pavan","machineDelivery":"-","planStart":"19-Jan-23","actualStart":"31-May-23","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":15000.0,"spent":5775.0,"committed":0,"exp2025":0,"exp2026":0,"balance":15000.0,"remarks":"","phasing":"","po":"PO-000003984","pr":""},{"code":"PRJ0237","name":"Installing A/C Units for Spare Parts Store","unit":"25","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"27-May-24","assetClass":"EQUIPMENT","class":"QUALITY","owner":"Mazin","leader":"Tariq","machineDelivery":"Yes.","planStart":"13-May-24","actualStart":"18-Aug-24","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":31550.0,"spent":21473.0,"committed":0.0,"exp2025":0.0,"exp2026":0.0,"balance":31550.0,"remarks":"","phasing":"","po":"PO-000005633\nPO-000005946","pr":""},{"code":"PRJ0043","name":"Scales, Filter F1 and magnetic separator-Silo Dept.","unit":"26","division":"Logistics Division CAPEX 2020-2025","divisionShort":"Logistics","yearBucket":"2020-2025","capexYear":"21-Feb-20","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Mazin","leader":"Tariq","machineDelivery":"Yes.","planStart":"21-Feb-20","actualStart":"30-Mar-25","status":"CO","presentAction":"Completed","nextAction":"To close and capitalize","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":295860.0,"spent":63289.0,"committed":0,"exp2025":0,"exp2026":0,"balance":295860.0,"remarks":"","phasing":"","po":"PO-000005765\nPO-000006881\nPO-000006882\nPO-000007015\nPO-000007170\nPO-000007302","pr":""},{"code":"—","name":"Construction Hay Al Myna New warehouses","unit":"1","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"15-Apr-26","actualStart":"","status":"IP","presentAction":"Consultant appointed","nextAction":"Concept design development","planFinish":"15-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":6214000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":6214000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Flour Finished Goods warehouses 4,000 Sqm","unit":"2","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"30-Apr-26","actualStart":"","status":"IP","presentAction":"Scope Management Approved","nextAction":"Raise PR","planFinish":"30-Mar-27","actualFinish":"","finalStatus":"Ongoing","budget":1100000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":1100000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Consultancy services for 80,000 MT new concrete silo","unit":"3","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"","actualStart":"","status":"IP","presentAction":"Memo and Scope Management Under Approval Process","nextAction":"Raise PR","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":900000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":900000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Major Structure Rectification of Silos and Tunnel","unit":"4","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"15-Jun-26","actualStart":"","status":"IP","presentAction":"Structural inspection ongoing","nextAction":"Submitting structural report and root cause","planFinish":"30-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":175000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":175000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Non confirming products store (500 sqm)","unit":"5","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"1-May-26","actualStart":"","status":"IP","presentAction":"Scope Management Approved","nextAction":"Raise PR","planFinish":"30-Mar-27","actualFinish":"","finalStatus":"Ongoing","budget":95000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":95000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Construct chemical storage area - IPM","unit":"6","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"1-May-26","actualStart":"","status":"IP","presentAction":"Scope Management Approved","nextAction":"Raise PR","planFinish":"30-Mar-27","actualFinish":"","finalStatus":"Ongoing","budget":72800.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":72800.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Warehouse Management System / with IT Department","unit":"7","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"-","planStart":"","actualStart":"","status":"IP","presentAction":"Under IT Steering committee","nextAction":"Raise PR","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":60000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":60000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Bird net for warehouses","unit":"8","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"Mazin","leader":"Tariq","machineDelivery":"No","planStart":"1-Mar-26","actualStart":"","status":"IP","presentAction":"Memo and Scope Management Under Approval Process","nextAction":"Raise PR","planFinish":"5-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":25000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":25000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Mobile chain conveyor - 2 NOS","unit":"9","division":"Logistics Division CAPEX 2026","divisionShort":"Logistics","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"PLANT & MACH","class":"INCREASE CAPACITY","owner":"Mazin","leader":"Tariq","machineDelivery":"No","planStart":"1-Mar-26","actualStart":"","status":"IP","presentAction":"Memo and Scope Management Under Approval Process","nextAction":"Raise PR","planFinish":"1-Aug-26","actualFinish":"","finalStatus":"Ongoing","budget":16500.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":16500.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0224","name":"Sweeper machine (diesel or electric)","unit":"1","division":"Transportion Division CAPEX 2020 - 2025","divisionShort":"Transportion","yearBucket":"2020-2025","capexYear":"17-Mar-24","assetClass":"EQUIPMENT","class":"INNOVATION","owner":"Waleed","leader":"Waleed","machineDelivery":"received","planStart":"","actualStart":"30-Mar-25","status":"CO","presentAction":"Completed","nextAction":"-","planFinish":"","actualFinish":"28-Feb-26","finalStatus":"Completed","budget":22000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":22000.0,"remarks":"","phasing":"Q3- 2026","po":"","pr":""},{"code":"PRJ0295","name":"Skip waste containers 2","unit":"2","division":"Transportion Division CAPEX 2020 - 2025","divisionShort":"Transportion","yearBucket":"2020-2025","capexYear":"20-Mar-25","assetClass":"EQUIPMENT","class":"REPLACEMENT","owner":"Waleed","leader":"obaid","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"Completed","nextAction":"completion form","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":11000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":11000.0,"remarks":"Transferred to Admin as reqested by CFO","phasing":"Q4- 2025","po":"","pr":""},{"code":"PRJ0296","name":"Feed bulk trailer (replacement of trailer 193 Turkey Gurlese","unit":"3","division":"Transportion Division CAPEX 2020 - 2025","divisionShort":"Transportion","yearBucket":"2020-2025","capexYear":"26-Mar-25","assetClass":"VEHICLE","class":"REPLACEMENT","owner":"Waleed","leader":"Waleed","machineDelivery":"30-Dec-26","planStart":"","actualStart":"","status":"IP","presentAction":"Production done","nextAction":"Shipping","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":50000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":50000.0,"remarks":"","phasing":"Q3- 2026","po":"","pr":""},{"code":"PRJ0285","name":"Grain Carriers top cover solutions","unit":"4","division":"Transportion Division CAPEX 2020 - 2025","divisionShort":"Transportion","yearBucket":"2020-2025","capexYear":"6-Mar-25","assetClass":"TOOLS & SPARES","class":"QUALITY","owner":"Waleed","leader":"Waleed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised","nextAction":"Tender Process-RFQ","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":35000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":35000.0,"remarks":"","phasing":"Q3- 2026","po":"","pr":""},{"code":"PRJ0252","name":"Truck tipper (Replacement of 8832)","unit":"5","division":"Transportion Division CAPEX 2020 - 2025","divisionShort":"Transportion","yearBucket":"2020-2025","capexYear":"3-Oct-24","assetClass":"VEHICLE","class":"REPLACEMENT","owner":"Waleed","leader":"Waleed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised-#15598- Tender Process-RFQ","nextAction":"Tender Process- Awaiting proposals","planFinish":"30-Aug-26","actualFinish":"","finalStatus":"Ongoing","budget":38500.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":38500.0,"remarks":"In process PR 15598","phasing":"Q3- 2026","po":"","pr":""},{"code":"PRJ0278","name":"Feed-Flour trailer","unit":"6","division":"Transportion Division CAPEX 2020 - 2025","divisionShort":"Transportion","yearBucket":"2020-2025","capexYear":"13/2/2025","assetClass":"VEHICLE","class":"REPLACEMENT","owner":"Anis","leader":"Waleed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised-#14313-Technical Evaluation done","nextAction":"Tender Process-commerical Eval, PO","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":50000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":50000.0,"remarks":"In process PR 14313","phasing":"Q3- 2026","po":"","pr":""},{"code":"PRJ0168","name":"Prime Movers & Feed Bulk Trailers - Ibri","unit":"7","division":"Transportion Division CAPEX 2020 - 2025","divisionShort":"Transportion","yearBucket":"2020-2025","capexYear":"28/11/2022","assetClass":"VEHICLE","class":"NECESSITY","owner":"Waleed","leader":"Waleed","machineDelivery":"30-Dec-26","planStart":"","actualStart":"","status":"CO","presentAction":"Completed","nextAction":"-","planFinish":"","actualFinish":"28-Feb-26","finalStatus":"Completed","budget":753160.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":753160.0,"remarks":"","phasing":"Q3- 2026","po":"","pr":""},{"code":"PRJ0319","name":"Prime mover replacement (Iveco 3202-2015, Mercedes 4240-2016","unit":"1","division":"Transportion Division CAPEX 2026","divisionShort":"Transportion","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"VEHICLE","class":"","owner":"Waleed","leader":"Waleed","machineDelivery":"ETA","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised","nextAction":"Tender Process-RFQ","planFinish":"31-Jul-26","actualFinish":"","finalStatus":"Ongoing","budget":120000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":120000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ........","name":"Trailer (replacement of trailer 6192 Ibri accident and 5643 steel bulker)","unit":"2","division":"Transportion Division CAPEX 2026","divisionShort":"Transportion","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"VEHICLE","class":"","owner":"Waleed","leader":"Waleed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"SMP/ create Project code","nextAction":"PR raise","planFinish":"31-Sept-26","actualFinish":"","finalStatus":"Ongoing","budget":120000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":120000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0318","name":"5 Forklifts replacement for forklifts (25, 35,39,40,41)","unit":"3","division":"Transportion Division CAPEX 2026","divisionShort":"Transportion","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"VEHICLE","class":"","owner":"Waleed","leader":"Waleed","machineDelivery":"July","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised- Technical Eval","nextAction":"Tender Process-commerical eval.,PO","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":80000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":80000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0319","name":"Scania 169 (2016)","unit":"4","division":"Transportion Division CAPEX 2026","divisionShort":"Transportion","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"VEHICLE","class":"","owner":"Waleed","leader":"Waleed","machineDelivery":"ETA","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised","nextAction":"Tender Process-RFQ","planFinish":"31-Jul-26","actualFinish":"","finalStatus":"Ongoing","budget":65000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":65000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ........","name":"Flour trailer","unit":"5","division":"Transportion Division CAPEX 2026","divisionShort":"Transportion","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"VEHICLE","class":"","owner":"Waleed","leader":"Waleed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"Waiting for sales confirmation-business expansion","nextAction":"Create PRJ","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":50000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":50000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ........","name":"Washing area for trucks and FL","unit":"6","division":"Transportion Division CAPEX 2026","divisionShort":"Transportion","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"QUALITY","owner":"Waleed","leader":"Pavan","machineDelivery":"-","planStart":"15-Jan-26","actualStart":"22-Apr-26","status":"IP","presentAction":"Scope Management Plan -Re-submitted 15th apr","nextAction":"raise PR- consultants","planFinish":"15-Oct-26","actualFinish":"","finalStatus":"Ongoing","budget":50000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":50000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0329","name":"Transformer -Supply & Installation","unit":"","division":"Transportion Division CAPEX 2026","divisionShort":"Transportion","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"QUALITY","owner":"Waleed","leader":"Pavan","machineDelivery":"-","planStart":"9-Mar-26","actualStart":"29-Mar-26","status":"IP","presentAction":"Scope Management Plan -done. Raised PR; TEC submitted","nextAction":"Tender Site visit","planFinish":"15-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":100000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":100000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0284","name":"Maintenance OFM Masjed","unit":"1","division":"Admin.Division CAPEX 2020-2025","divisionShort":"Admin","yearBucket":"2020-2025","capexYear":"3-Apr-25","assetClass":"BUILDING","class":"NECESSITY","owner":"obaid","leader":"Tariq","machineDelivery":"No","planStart":"15-Jan-26","actualStart":"","status":"IP","presentAction":"Revise scope a sper current budget","nextAction":"Creat MEMO for project approval","planFinish":"20-Feb-26","actualFinish":"","finalStatus":"Ongoing","budget":5000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":5000.0,"remarks":"","phasing":"Q1 2026","po":"","pr":""},{"code":"PRJ0302","name":"Scrap Yard Relocation and Land Preparation","unit":"2","division":"Admin.Division CAPEX 2020-2025","divisionShort":"Admin","yearBucket":"2020-2025","capexYear":"7-Sep-25","assetClass":"LAND","class":"INCREASE CAPACITY","owner":"obaid","leader":"Tariq","machineDelivery":"No","planStart":"15-Nov-24","actualStart":"","status":"CO","presentAction":"Capitalization","nextAction":"Documentation and archiving","planFinish":"30-Aug-26","actualFinish":"30-Dec-26","finalStatus":"Completed","budget":55000.0,"spent":0,"committed":60840.0,"exp2025":0,"exp2026":0,"balance":-5840.0,"remarks":"","phasing":"Q4  2025","po":"PO-000007043","pr":""},{"code":"PRJ0246","name":"New cabinet (container)","unit":"3","division":"Admin.Division CAPEX 2020-2025","divisionShort":"Admin","yearBucket":"2020-2025","capexYear":"22-Jul-24","assetClass":"BUILDING","class":"RENOVATION","owner":"obaid","leader":"Mohamed","machineDelivery":"No","planStart":"30-Mar-26","actualStart":"","status":"IP","presentAction":"Under TENDER Stratigy","nextAction":"Reciving Propsals","planFinish":"1-Jun-27","actualFinish":"","finalStatus":"Ongoing","budget":80000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":80000.0,"remarks":"","phasing":"Q2 2026","po":"","pr":""},{"code":"PRJ0230","name":"Painting OFM building","unit":"4","division":"Admin.Division CAPEX 2020-2025","divisionShort":"Admin","yearBucket":"2020-2025","capexYear":"4-Jul-24","assetClass":"BUILDING","class":"RENOVATION","owner":"obaid","leader":"Tariq","machineDelivery":"No","planStart":"1-Mar-26","actualStart":"","status":"IP","presentAction":"PR raised","nextAction":"Floating tender","planFinish":"10-Aug-26","actualFinish":"","finalStatus":"Ongoing","budget":90000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":90000.0,"remarks":"","phasing":"Q3 2026","po":"","pr":""},{"code":"PRJ0280","name":"Operation offices enhancement","unit":"5","division":"Admin.Division CAPEX 2020-2025","divisionShort":"Admin","yearBucket":"2020-2025","capexYear":"13-Feb-25","assetClass":"BUILDING","class":"RENOVATION","owner":"obaid","leader":"Pavan","machineDelivery":"No","planStart":"1-Mar-26","actualStart":"","status":"IP","presentAction":"Scope Management Plan -Re-submitted 15th apr","nextAction":"Re-Raise PR","planFinish":"15-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":145000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":145000.0,"remarks":"","phasing":"Q3 2026","po":"","pr":""},{"code":"PRJ0303","name":"Construction of 56 shaded Parking spaces","unit":"6","division":"Admin.Division CAPEX 2020-2025","divisionShort":"Admin","yearBucket":"2020-2025","capexYear":"9-Jul-25","assetClass":"BUILDING","class":"RENOVATION","owner":"obaid","leader":"Tariq","machineDelivery":"Yes","planStart":"6-Sep-25","actualStart":"6-Sep-25","status":"CO","presentAction":"Capitalization","nextAction":"Documentation and archiving","planFinish":"21-Oct-25","actualFinish":"20-Nov-25","finalStatus":"Completed","budget":19000.0,"spent":0,"committed":19950.0,"exp2025":0,"exp2026":0,"balance":-950.0,"remarks":"","phasing":"Q4 2025","po":"PO-000007168","pr":""},{"code":"PRJ0199","name":"New Parking shade","unit":"7","division":"Admin.Division CAPEX 2020-2025","divisionShort":"Admin","yearBucket":"2020-2025","capexYear":"24-Jul-23","assetClass":"BUILDING","class":"INCREASE CAPACITY","owner":"obaid","leader":"Tariq","machineDelivery":"No","planStart":"","actualStart":"","status":"CO","presentAction":"","nextAction":"","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":3424.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":3424.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0131","name":"OFM main road & plants lighting","unit":"8","division":"Admin.Division CAPEX 2020-2025","divisionShort":"Admin","yearBucket":"2020-2025","capexYear":"20-Feb-22","assetClass":"BUILDING","class":"RENOVATION","owner":"obaid","leader":"Tariq","machineDelivery":"No","planStart":"","actualStart":"","status":"CO","presentAction":"","nextAction":"","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":663.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":663.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0317","name":"Main office renovations- GF & 2nd floor reception & board room.","unit":"1","division":"Admin.Division CAPEX 2026","divisionShort":"Admin","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"NECESSITY","owner":"obaid","leader":"Tariq","machineDelivery":"","planStart":"18-Feb-26","actualStart":"","status":"IP","presentAction":"TE Evaluation Submitted","nextAction":"Commercial Evaluation Ongoing","planFinish":"18-Apr-26","actualFinish":"","finalStatus":"Ongoing","budget":110550.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":110550.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Replacemnet of Central AC - Atyab Inves. Building","unit":"2","division":"Admin.Division CAPEX 2026","divisionShort":"Admin","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"EQUIPMENT","class":"NECESSITY","owner":"obaid","leader":"Pavan","machineDelivery":"","planStart":"22-Jan-26","actualStart":"","status":"IP","presentAction":"Scope Management Plan -REJECTED(Procurement)","nextAction":"Rais PR","planFinish":"1-Jul-26","actualFinish":"","finalStatus":"Ongoing","budget":17000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":17000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"LAB renovation","unit":"3","division":"Admin.Division CAPEX 2026","divisionShort":"Admin","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"BUILDING","class":"RENOVATION","owner":"obaid","leader":"Pavan","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"Scope management plan approved","nextAction":"End user coordinating with AIS-Lab modification approval","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":23000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":23000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Company car (Visitors relations) - 1 no.","unit":"4","division":"Admin.Division CAPEX 2026","divisionShort":"Admin","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"VEHICLE","class":"INCREASE CAPACITY","owner":"obaid","leader":"Obaid","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"On Hold","nextAction":"Get project code","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":45000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":45000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"—","name":"Electric vehicle - 3 nos.","unit":"5","division":"Admin.Division CAPEX 2026","divisionShort":"Admin","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"VEHICLE","class":"INCREASE CAPACITY","owner":"obaid","leader":"Obaid","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"MEMO completed - evaluating options","nextAction":"Get project code","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":36000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":36000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0260","name":"ProplanT Mobile for Flour Mills A& B feed Mills A&B , Feed Mill ,Silo Complex","unit":"1","division":"Maintenance Division CAPEX 2020 - 2025","divisionShort":"Maintenance","yearBucket":"2020-2025","capexYear":"27-Jan-25","assetClass":"P&M","class":"Necessity","owner":"Kailash","leader":"Tariq","machineDelivery":"","planStart":"","actualStart":"","status":"CO","presentAction":"Buhler compling cloud data","nextAction":"Buhler to be on site","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":25000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":25000.0,"remarks":"","phasing":"Q4 2025","po":"","pr":""},{"code":"PRJ0257","name":"Replacing Main distribution for TR #1 B Mill AFM","unit":"2","division":"Maintenance Division CAPEX 2020 - 2025","divisionShort":"Maintenance","yearBucket":"2020-2025","capexYear":"27-Jan-25","assetClass":"Equipment","class":"Replacement","owner":"Kailash","leader":"Mohammed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"Plan for shutdown with the end user","nextAction":"","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":8000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":8000.0,"remarks":"","phasing":"Q2 2026","po":"","pr":""},{"code":"PRJ0261","name":"2 x Air Dryers for the Compressors","unit":"3","division":"Maintenance Division CAPEX 2020 - 2025","divisionShort":"Maintenance","yearBucket":"2020-2025","capexYear":"27-Jan-25","assetClass":"Equipment","class":"Replacement","owner":"Kailash","leader":"Mohammed","machineDelivery":"No","planStart":"","actualStart":"30-Mar-26","status":"IP","presentAction":"Wating for Dryers","nextAction":"To make a useful installation plan","planFinish":"15-Mar-26","actualFinish":"","finalStatus":"Ongoing","budget":15000.0,"spent":18480.0,"committed":3480.0,"exp2025":0,"exp2026":0,"balance":11520.0,"remarks":"","phasing":"Q4 2025","po":"PO-000007363","pr":""},{"code":"PRJ0258","name":"LV Panel Transformer #5 & Modular capacitor Flour Mills","unit":"4","division":"Maintenance Division CAPEX 2020 - 2025","divisionShort":"Maintenance","yearBucket":"2020-2025","capexYear":"27-Jan-25","assetClass":"Equipment","class":"Replacement","owner":"Kailash","leader":"Mohammed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"Plan for shutdown with the end user","nextAction":"","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":20000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":20000.0,"remarks":"","phasing":"Q2 2026","po":"","pr":""},{"code":"PRJ0212","name":"Fluting Machine","unit":"5","division":"Maintenance Division CAPEX 2020 - 2025","divisionShort":"Maintenance","yearBucket":"2020-2025","capexYear":"7-Feb-24","assetClass":"Equipment","class":"Necessity","owner":"Kailash","leader":"Mohammed","machineDelivery":"Received","planStart":"28-Jan-26","actualStart":"28-Jan-26","status":"CO","presentAction":"Room to be painted Work done","nextAction":"Balaguer will be on site on 7th Feb 2026","planFinish":"15-Mar-26","actualFinish":"","finalStatus":"Completed","budget":117700.0,"spent":2919.0,"committed":0,"exp2025":0,"exp2026":0,"balance":117700.0,"remarks":"","phasing":"Q1 2026","po":"PO-000005884, PO-000007230","pr":""},{"code":"PRJ0253","name":"Lifting equipment and Winches","unit":"1","division":"HSSE Division CAPEX 2022 - 2025","divisionShort":"HSSE","yearBucket":"2022-2025","capexYear":"10-Sep-24","assetClass":"EQUIPMENT","class":"SAFETY","owner":"Abdullah","leader":"Mohammed","machineDelivery":"No","planStart":"15-Sep-24","actualStart":"","status":"IP","presentAction":"Technical Eval","nextAction":"PO issue & Installation -Q2 Jun","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":7000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":7000.0,"remarks":"","phasing":"Q2 2026","po":"","pr":""},{"code":"PRJ0236","name":"Integrated evacuation alarm systems( design service-phase1)","unit":"2","division":"HSSE Division CAPEX 2022 - 2025","divisionShort":"HSSE","yearBucket":"2022-2025","capexYear":"27-May-24","assetClass":"EQUIPMENT","class":"SAFETY","owner":"Abdullah","leader":"Pavan","machineDelivery":"Yes","planStart":"15-Jun-24","actualStart":"","status":"IP","presentAction":"SMP approved . PR Raised; Awaiting Sow-approval","nextAction":"Tender process- strategic approval,","planFinish":"30-Jun-26","actualFinish":"","finalStatus":"Ongoing","budget":45000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":45000.0,"remarks":"","phasing":"Q2 2026","po":"","pr":""},{"code":"PRJ0283","name":"Relocation of CCTV cameras","unit":"3","division":"HSSE Division CAPEX 2022 - 2025","divisionShort":"HSSE","yearBucket":"2022-2025","capexYear":"3-Mar-25","assetClass":"EQUIPMENT","class":"RENOVATION","owner":"Abdullah","leader":"Tariq","machineDelivery":"No","planStart":"15-Jan-26","actualStart":"","status":"IP","presentAction":"SOW shared","nextAction":"Raise PR -Tender strategic approval","planFinish":"30-Mar-26","actualFinish":"","finalStatus":"Ongoing","budget":50000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":50000.0,"remarks":"1) Plan start Q1-2026- Align with new office;","phasing":"Q1 2026","po":"","pr":""},{"code":"PRJ0297","name":"OFM fire protection system (HSE)/MP","unit":"4","division":"HSSE Division CAPEX 2022 - 2025","divisionShort":"HSSE","yearBucket":"2022-2025","capexYear":"27-Mar-25","assetClass":"EQUIPMENT","class":"REGULATORY REQUIREMENT","owner":"Abdullah","leader":"Pavan","machineDelivery":"Yes","planStart":"22-Jan-26","actualStart":"","status":"IP","presentAction":"SMP approved . Raised PR. Awaiting Sow/TEC -approval","nextAction":"SOW documents -review & raise PR.","planFinish":"30-Dec-26","actualFinish":"","finalStatus":"Ongoing","budget":409600.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":409600.0,"remarks":"Consulatnt justifictaion for location","phasing":"Q4 2026","po":"","pr":""},{"code":"Opex","name":"HSE culture transformation support","unit":"1","division":"HSSE Division CAPEX 2022 - 2026","divisionShort":"HSSE","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"","class":"","owner":"Abdullah","leader":"Mohammed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"Scope management plan approved. PR raised","nextAction":"Tender process","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":0.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0320","name":"HSSE Software","unit":"2","division":"HSSE Division CAPEX 2022 - 2026","divisionShort":"HSSE","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"","class":"","owner":"Abdullah","leader":"Mohammed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"Scope management plan approved. PR raised","nextAction":"Tender process","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":20000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":20000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0321","name":"Waste Segregation bins","unit":"3","division":"HSSE Division CAPEX 2022 - 2026","divisionShort":"HSSE","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"","class":"","owner":"Abdullah","leader":"Mohammed","machineDelivery":"","planStart":"","actualStart":"","status":"IP","presentAction":"Scope management plan approved. PR raised","nextAction":"Tender process","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":2999.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":2999.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0226","name":"Dust stop hoppers for silo","unit":"1","division":"Innovation Division CAPEX 2024 - 2025","divisionShort":"Innovation","yearBucket":"2024-2025","capexYear":"","assetClass":"Equipment","class":"IN","owner":"Adil","leader":"Mohamed","machineDelivery":"","planStart":"","actualStart":"","status":"CO","presentAction":"Completion report","nextAction":"-","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":55000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":55000.0,"remarks":"","phasing":"Q1- 2026","po":"","pr":""},{"code":"PRJ0227","name":"Eniscope for saving energy at flour mill machineries.","unit":"2","division":"Innovation Division CAPEX 2024 - 2025","divisionShort":"Innovation","yearBucket":"2024-2025","capexYear":"","assetClass":"P&M","class":"CS","owner":"Adil","leader":"Mohamed","machineDelivery":"","planStart":"","actualStart":"","status":"CO","presentAction":"Completion report","nextAction":"-","planFinish":"","actualFinish":"","finalStatus":"Completed","budget":85000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":85000.0,"remarks":"","phasing":"Q3- 2026","po":"","pr":""},{"code":"PRJ0324","name":"Flour Mill Cooling System","unit":"1","division":"Innovation Division CAPEX 2026","divisionShort":"Innovation","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"","class":"","owner":"Adil","leader":"Mohamed","machineDelivery":"1-Mar-26","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised","nextAction":"Tender site visit","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":120000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":120000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0327","name":"Implement Heat Treatment Units","unit":"2","division":"Innovation Division CAPEX 2026","divisionShort":"Innovation","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"","class":"","owner":"Adil","leader":"Mohamed","machineDelivery":"1-Feb-26","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised- tender site visit done","nextAction":"Awaiting proposals","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":95000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":95000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0328","name":"AI-Production Data Analysis Solution (Siemens)","unit":"3","division":"Innovation Division CAPEX 2026","divisionShort":"Innovation","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"","class":"","owner":"Adil","leader":"Mohamed","machineDelivery":"24-Mar-26","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised- tender site visit done","nextAction":"Awaiting proposals","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":80000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":80000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0325","name":"Automated Truck-Bag Loading System","unit":"4","division":"Innovation Division CAPEX 2026","divisionShort":"Innovation","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"","class":"","owner":"Adil","leader":"Mohamed","machineDelivery":"1-Feb-26","planStart":"","actualStart":"","status":"IP","presentAction":"PR Raised","nextAction":"Tender site visit","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":15000.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":15000.0,"remarks":"","phasing":"","po":"","pr":""},{"code":"PRJ0326","name":"Implement a Smart Home System","unit":"6","division":"Innovation Division CAPEX 2026","divisionShort":"Innovation","yearBucket":"2026","capexYear":"15-Jan-26","assetClass":"","class":"","owner":"Adil","leader":"Mohamed","machineDelivery":"1-Jan-26","planStart":"","actualStart":"","status":"IP","presentAction":"PO issued - Work started at site","nextAction":"Followup site works /supervision.","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":2000.0,"spent":1395.0,"committed":1395.0,"exp2025":0.0,"exp2026":0.0,"balance":605.0,"remarks":"","phasing":"","po":"PO-8054","pr":""},{"code":"PRJ0298","name":"ESG & Sustainability Data Collection and Reporting Developme","unit":"1","division":"Sustainability  Division","divisionShort":"Sustainability","yearBucket":"—","capexYear":"","assetClass":"IT","class":"N","owner":"Abdulaziz Abdullah Zahran Al Shamsi","leader":"Muath","machineDelivery":"YES","planStart":"45553","actualStart":"45767","status":"IP","presentAction":"","nextAction":"","planFinish":"Sep 2025","actualFinish":"","finalStatus":"Ongoing","budget":26950.0,"spent":0,"committed":0,"exp2025":0,"exp2026":0,"balance":26950.0,"remarks":"","phasing":"Q3- 2026","po":"","pr":""},{"code":"PRJ0301","name":"Single Source Selection – ERP QC Module","unit":"1","division":"Compliance. division","divisionShort":"Compliance","yearBucket":"—","capexYear":"","assetClass":"IT","class":"IN","owner":"Hamed  & Abeer","leader":"Tariq","machineDelivery":"YES","planStart":"2025","actualStart":"","status":"IP","presentAction":"software testing","nextAction":"To be closed","planFinish":"","actualFinish":"","finalStatus":"Ongoing","budget":19250.0,"spent":7219.0,"committed":0,"exp2025":0,"exp2026":12031.0,"balance":7219.0,"remarks":"","phasing":"Q1 - 2026","po":"","pr":""}];
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTUicF2vr-NL2_k3Yg0LA_t0UmKHXh-TxpHL4bU4HmPpUmuK8m6SX27w2duKbQWzg/pub?gid=903825658&single=true&output=csv";
+
+function parseNum(s){
+  if(s==null)return 0;const str=String(s).trim();
+  if(/[A-DF-Za-df-z]/.test(str))return 0;
+  const n=parseFloat(str.replace(/[, ]/g,'').replace(/[^\d.\-]/g,''));
+  return isNaN(n)?0:n;
+}
+function parseCSV(t){
+  const rows=[];let cur=[],f='',q=false;
+  for(let i=0;i<t.length;i++){const c=t[i],n=t[i+1];
+    if(q){if(c==='"'&&n==='"'){f+='"';i++;}else if(c==='"')q=false;else f+=c;}
+    else{if(c==='"')q=true;else if(c===','){cur.push(f);f='';}
+    else if(c==='\n'){cur.push(f);rows.push(cur);cur=[];f='';}
+    else if(c!=='\r')f+=c;}
+  }
+  if(f.length||cur.length){cur.push(f);rows.push(cur);}return rows;
+}
+function buildProjects(rawRows){
+  const ps=[];let dv='',ds='',yb='';
+  for(const row of rawRows){
+    if(!row||row.length<3)continue;
+    const c0=(row[0]||'').trim(),c1=(row[1]||'').trim(),c2=(row[2]||'').trim();
+    if(c2&&/Division|division/.test(c2)&&!c1.startsWith('PRJ')&&!/^\d+$/.test(c0)){
+      dv=c2;const l=c2.toLowerCase();
+      if(l.includes('flour'))ds='Flour';else if(l.includes('feed'))ds='Feed';
+      else if(l.includes('logistics'))ds='Logistics';else if(l.includes('transport'))ds='Transportion';
+      else if(l.includes('admin'))ds='Admin';else if(l.includes('maintenance'))ds='Maintenance';
+      else if(l.includes('hsse'))ds='HSSE';else if(l.includes('innovation'))ds='Innovation';
+      else if(l.includes('sustainability'))ds='Sustainability';else if(l.includes('compliance'))ds='Compliance';
+      else ds=c2.split(' ')[0];
+      if(c2.includes('2026')&&!c2.includes('2020')&&!c2.includes('2022')&&!c2.includes('2024')&&!c2.includes('2025'))yb='2026';
+      else if(c2.includes('2020')&&c2.includes('2025'))yb='2020-2025';
+      else if(c2.includes('2022')&&c2.includes('2026'))yb='2026';
+      else if(c2.includes('2022'))yb='2022-2025';
+      else if(c2.includes('2025'))yb='2025';
+      else if(c2.includes('2026'))yb='2026';else yb='—';
+      continue;
+    }
+    if(!c2||(!c1&&!/^\d+$/.test(c0)))continue;if(!dv)continue;
+    const st=(row[16]||'').trim().toUpperCase(),fs=(row[21]||'').trim();
+    const fl=fs.toLowerCase();let ns=st;
+    if(fl==='completed')ns='CO';
+    else if(yb==='2026'){if(fl==='ongoing')ns='IP';else if(fl.includes('hold'))ns='HOL';else if(fl.startsWith('cancel'))ns='CAN';}
+    ps.push({code:c1||'—',name:c2,unit:c0,division:dv,divisionShort:ds,yearBucket:yb,
+      capexYear:(row[3]||'').trim(),assetClass:(row[4]||'').trim(),class:(row[5]||'').trim(),
+      owner:(row[6]||'').trim(),leader:(row[7]||'').trim(),machineDelivery:(row[8]||'').trim(),
+      planStart:(row[9]||'').trim(),actualStart:(row[10]||'').trim(),status:ns,
+      presentAction:(row[17]||'').trim(),nextAction:(row[18]||'').trim(),
+      planFinish:(row[19]||'').trim(),actualFinish:(row[20]||'').trim(),finalStatus:fs,
+      budget:parseNum(row[22]),spent:parseNum(row[23]),committed:parseNum(row[24]),
+      exp2025:parseNum(row[25]),exp2026:parseNum(row[26]),balance:parseNum(row[27]),
+      remarks:(row[28]||'').trim(),phasing:(row[30]||'').trim(),po:(row[31]||'').trim(),pr:(row[32]||'').trim()
+    });
+  }return ps;
+}
+function initFilters(){
+  PROJECTS.forEach(p=>{
+    const yb=(p.yearBucket||'').trim();
+    if(yb==='2026'||yb==='2022-2026')p.yearGroup='2026';
+    else if(yb&&yb!=='—')p.yearGroup='2020-2025';
+    else p.yearGroup='';
+  });
+  fillSelect('fDivision', uniq(PROJECTS.map(p=>p.divisionShort)), 'All Divisions');
+  fillSelect('fYear', ['2020-2025','2026'], 'All Years');
+  fillSelect('fAsset', uniq(PROJECTS.map(p=>p.assetClass)), 'All Asset Classes');
+  fillSelect('fOwner', uniq(PROJECTS.map(p=>p.owner)), 'All Owners');
+}
+async function loadProjects(){
+  document.body.style.cursor='progress';
+  const badge=document.getElementById('btnRefresh');
+  try{
+    const r=await fetch(SHEET_CSV_URL+'&cb='+Date.now(),{mode:'cors',cache:'no-cache'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const live=buildProjects(parseCSV(await r.text()));
+    if(live && live.length>10){
+      PROJECTS=live;
+      if(badge){badge.innerHTML='<span class="live-dot"></span>LIVE DATA · Click to Refresh';badge.title='Live from Google Sheet';}
+    } else throw new Error('empty data');
+  } catch(e){
+    console.warn('Live failed:',e.message,'. Using snapshot.');
+    PROJECTS=EMBEDDED_PROJECTS.slice();
+    if(badge){badge.innerHTML='<span class="live-dot" style="background:#D4A017"></span>SNAPSHOT (Jun 9) · Click to Retry';}
+  }
+  const ts=document.getElementById('lastRefreshed');
+  if(ts) ts.textContent='Last refreshed: '+new Date().toLocaleString();
+  initFilters();
+  render();
+  document.body.style.cursor='';
+}
+
+
+// ─── Helpers ───────────────────────────────────────────────────
+const $ = (id) => document.getElementById(id);
+function fmtOMR(n){
+  n = +n || 0;
+  if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(2)+'M';
+  if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toLocaleString('en-US',{maximumFractionDigits:0});
+}
+function fmtFull(n){
+  n = +n || 0;
+  return n.toLocaleString('en-US',{maximumFractionDigits:0});
+}
+function uniq(arr){return [...new Set(arr)].filter(x=>x!=null && x!=='').sort();}
+
+// ─── Populate filter dropdowns ─────────────────────────────────
+function fillSelect(id, values, placeholder){
+  const sel = $(id);
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+    values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+fillSelect('fDivision', uniq(PROJECTS.map(p=>p.divisionShort)), 'All Divisions');
+// Group year buckets into two filter options: 2020-2025 (covers anything ≤2025) and 2026
+PROJECTS.forEach(p => {
+  const yb = (p.yearBucket || '').trim();
+  if (yb === '2026') p.yearGroup = '2026';
+  else if (yb && yb !== '—') p.yearGroup = '2020-2025';
+  else p.yearGroup = '';
+});
+fillSelect('fYear', ['2020-2025','2026'], 'All Years');
+fillSelect('fAsset', uniq(PROJECTS.map(p=>p.assetClass)), 'All Asset Classes');
+fillSelect('fOwner', uniq(PROJECTS.map(p=>p.owner)), 'All Owners');
+
+// Status select handled in HTML; replicate "Not Started" entry properly
+$('fStatus').innerHTML = `
+  <option value="__ALL__">All Statuses</option>
+  <option value="IP">In Progress</option>
+  <option value="CO">Completed</option>
+  <option value="HOL">On Hold</option>
+  <option value="__NONE__">Not Started / N/A</option>
+`;
+$('fStatus').value = '__ALL__';
+
+// ─── State ─────────────────────────────────────────────────────
+let state = {
+  search:'',
+  division:'',
+  year:'',
+  status:'__ALL__',
+  finalStatus:'',
+  asset:'',
+  owner:'',
+  sortKey:'code',
+  sortDir:'asc',
+  kpiActive:'all',
+};
+
+// ─── Filtering ─────────────────────────────────────────────────
+function filtered(){
+  const s = state.search.toLowerCase();
+  return PROJECTS.filter(p => {
+    if (state.division && p.divisionShort !== state.division) return false;
+    if (state.year && p.yearGroup !== state.year) return false;
+    if (state.status === '__NONE__'){ if (p.status !== '') return false; }
+    else if (state.status && state.status !== '__ALL__'){ if (p.status !== state.status) return false; }
+    if (state.finalStatus && p.finalStatus !== state.finalStatus) return false;
+    if (state.asset && p.assetClass !== state.asset) return false;
+    if (state.owner && p.owner !== state.owner) return false;
+    if (state.kpiActive && state.kpiActive !== 'all' && state.kpiActive !== 'bud'){
+      if (p.status !== state.kpiActive) return false;
+    }
+    if (s){
+      const blob = (p.code+' '+p.name+' '+p.remarks+' '+p.owner+' '+p.leader+' '+p.po+' '+p.presentAction+' '+p.nextAction).toLowerCase();
+      if (!blob.includes(s)) return false;
+    }
+    return true;
+  });
+}
+
+function sorted(rows){
+  const k = state.sortKey;
+  const dir = state.sortDir === 'asc' ? 1 : -1;
+  return [...rows].sort((a,b)=>{
+    let av = a[k], bv = b[k];
+    if (typeof av === 'number' || typeof bv === 'number'){
+      return ((+av||0) - (+bv||0)) * dir;
+    }
+    return String(av||'').localeCompare(String(bv||'')) * dir;
+  });
+}
+
+// ─── Render ────────────────────────────────────────────────────
+function render(){
+  const rows = sorted(filtered());
+
+  // KPI numbers (over filtered set, except for the "all" baseline)
+  const all = PROJECTS;  // for header counts
+  $('hpTotal').textContent = all.length;
+  $('hpBudget').textContent = 'OMR '+fmtOMR(all.reduce((s,p)=>s+p.budget,0));
+  $('refreshTime').textContent = new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  // Filtered KPI tiles
+  const kpiBase = state.kpiActive === 'all' ? rows : (
+    // Count from current filters but ignore the kpi filter so click toggle remains accurate
+    PROJECTS.filter(p => {
+      if (state.division && p.divisionShort !== state.division) return false;
+      if (state.year && p.yearGroup !== state.year) return false;
+      if (state.finalStatus && p.finalStatus !== state.finalStatus) return false;
+      if (state.asset && p.assetClass !== state.asset) return false;
+      if (state.owner && p.owner !== state.owner) return false;
+      if (state.search){
+        const blob = (p.code+' '+p.name+' '+p.remarks+' '+p.owner+' '+p.leader+' '+p.po).toLowerCase();
+        if (!blob.includes(state.search.toLowerCase())) return false;
+      }
+      return true;
+    })
+  );
+  const total = kpiBase.length;
+  const ip = kpiBase.filter(p=>p.status==='IP').length;
+  const co = kpiBase.filter(p=>p.status==='CO').length;
+  const hol = kpiBase.filter(p=>p.status==='HOL').length;
+  $('kTotal').textContent = total;
+  $('kIP').textContent = ip;
+  $('kCO').textContent = co;
+  $('kHOL').textContent = hol;
+  const pct = (n)=> total ? ((n/total)*100).toFixed(0)+'% of total' : '—';
+  $('kIPpct').textContent = pct(ip);
+  $('kCOpct').textContent = pct(co);
+  $('kHOLpct').textContent = pct(hol);
+
+  const budget    = rows.reduce((s,p)=>s+p.budget,0);
+  const spent     = rows.reduce((s,p)=>s+p.spent,0);
+  const committed = rows.reduce((s,p)=>s+p.committed,0);
+  const expTotal  = rows.reduce((s,p)=>s+(p.exp2025||0)+(p.exp2026||0),0);
+  const balance   = rows.reduce((s,p)=>s+p.balance,0);
+  $('kBud').textContent = fmtOMR(budget);
+  $('kBudSub').textContent = budget ? Math.round((spent/budget)*100)+'% spent ('+fmtOMR(spent)+')' : '—';
+
+  $('fBudget').textContent    = 'OMR '+fmtOMR(budget);
+  $('fSpent').textContent     = 'OMR '+fmtOMR(spent);
+  $('fCommitted').textContent = 'OMR '+fmtOMR(committed);
+  if($('fExp2026'))$('fExp2026').textContent = 'OMR '+fmtOMR(expTotal);
+  $('fBalance').textContent   = 'OMR '+fmtOMR(balance);
+  const utilization = budget ? Math.min(100,((spent+committed+expTotal)/budget)*100) : 0;
+  $('fFill').style.width = utilization.toFixed(1)+'%';
+  $('fPct').textContent = utilization.toFixed(1)+'%';
+
+  // KPI card active state
+  document.querySelectorAll('.kpi').forEach(el=>{
+    el.classList.toggle('active', el.dataset.kpi === state.kpiActive);
+  });
+
+  // Counts
+  $('rcount').textContent = rows.length;
+  $('rtotal').textContent = PROJECTS.length;
+
+  // Table
+  const tbody = $('tbody');
+  if (!rows.length){
+    tbody.innerHTML = '';
+    $('emptyState').style.display = '';
+  } else {
+    $('emptyState').style.display = 'none';
+    tbody.innerHTML = rows.map((p,i)=> rowHtml(p,i)).join('');
+    // Bind row click
+    [...tbody.querySelectorAll('tr')].forEach((tr,i)=>{
+      tr.addEventListener('click', ()=> openModal(rows[i]));
+    });
+  }
+
+  // Sort indicators
+  document.querySelectorAll('thead th').forEach(th=>{
+    th.classList.toggle('sorted', th.dataset.sort === state.sortKey);
+    const sp = th.querySelector('.sort');
+    if (sp) sp.textContent = th.dataset.sort === state.sortKey ? (state.sortDir === 'asc' ? '↑' : '↓') : '↕';
+  });
+
+  // Charts
+  renderCharts(rows);
+}
+
+function rowHtml(p,i){
+  const statusKey = p.status || 'NA';
+  const statusLabel = ({'IP':'In Progress','CO':'Completed','HOL':'On Hold'}[p.status] || '—');
+  const utilization = p.budget ? Math.min(100, ((p.spent+p.committed)/p.budget)*100) : 0;
+  const balClass = p.balance > 0 ? 'bal-pos' : (p.balance < 0 ? 'bal-neg' : 'bal-zero');
+  return `<tr>
+    <td><span class="code">${escapeHtml(p.code)}</span></td>
+    <td class="proj-name">${escapeHtml(p.name)}<small>${escapeHtml(p.assetClass)} · ${escapeHtml(p.class)}</small></td>
+    <td><span class="div-tag">${escapeHtml(p.divisionShort)}</span><br><small style="color:var(--muted);font-size:10.5px;">${escapeHtml(p.yearBucket)}</small></td>
+    <td>${escapeHtml(p.owner)||'<span style="color:var(--muted)">—</span>'}</td>
+    <td><span class="status-pill s-${statusKey}">${statusLabel}</span></td>
+    <td class="num bud">${p.budget?fmtFull(p.budget):'—'}</td>
+    <td class="num spent">${p.spent?fmtFull(p.spent):'—'}</td>
+    <td class="num ${balClass}">${p.balance?fmtFull(p.balance):'—'}</td>
+    <td>
+      <div class="minibar-wrap">
+        <div class="minibar"><div class="minibar-fill" style="width:${utilization.toFixed(1)}%;"></div></div>
+        <div class="minibar-pct">${utilization.toFixed(0)}%</div>
+      </div>
+    </td>
+    <td style="white-space:nowrap;font-size:12.5px;color:var(--text-2);">${escapeHtml(p.planFinish)||'—'}</td>
+  </tr>`;
+}
+
+// ─── Modal ─────────────────────────────────────────────────────
+function openModal(p){
+  $('mName').textContent = p.name;
+  $('mMeta').innerHTML = `<b>${escapeHtml(p.code)}</b> · ${escapeHtml(p.division)} · Unit ${escapeHtml(p.unit)||'—'}`;
+  const utilization = p.budget ? Math.min(100, ((p.spent+p.committed)/p.budget)*100) : 0;
+  const empty = (s) => s ? escapeHtml(s) : '<span class="empty">— not set —</span>';
+  $('mBody').innerHTML = `
+    <div class="modal-section">
+      <h3>Financial Summary</h3>
+      <div class="modal-fin">
+        <div class="modal-fin-item"><div class="l">Budget</div><div class="v gold">${p.budget?fmtFull(p.budget):'—'}</div></div>
+        <div class="modal-fin-item"><div class="l">Actual Spent</div><div class="v">${p.spent?fmtFull(p.spent):'—'}</div></div>
+        <div class="modal-fin-item"><div class="l">Committed</div><div class="v">${p.committed?fmtFull(p.committed):'—'}</div></div>
+        <div class="modal-fin-item"><div class="l">Balance</div><div class="v ${p.balance>0?'green':''}">${p.balance?fmtFull(p.balance):'—'}</div></div>
+      </div>
+      <div style="margin-top:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;">
+          <span>Budget Utilization</span><span>${utilization.toFixed(1)}%</span>
+        </div>
+        <div class="fin-progress-bar"><div class="fin-progress-fill" style="width:${utilization.toFixed(1)}%;"></div></div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <h3>Project Details</h3>
+      <div class="kv-grid">
+        <div class="kv-row"><span class="kv-k">Project Owner</span><span class="kv-v ${p.owner?'':'empty'}">${empty(p.owner)}</span></div>
+        <div class="kv-row"><span class="kv-k">Project Leader</span><span class="kv-v ${p.leader?'':'empty'}">${empty(p.leader)}</span></div>
+        <div class="kv-row"><span class="kv-k">Asset Class</span><span class="kv-v">${empty(p.assetClass)}</span></div>
+        <div class="kv-row"><span class="kv-k">Class</span><span class="kv-v">${empty(p.class)}</span></div>
+        <div class="kv-row"><span class="kv-k">CAPEX Year</span><span class="kv-v">${empty(p.capexYear)}</span></div>
+        <div class="kv-row"><span class="kv-k">Status</span><span class="kv-v">${({'IP':'In Progress','CO':'Completed','HOL':'On Hold'}[p.status]) || empty(p.status)}</span></div>
+        <div class="kv-row"><span class="kv-k">Final Status</span><span class="kv-v">${empty(p.finalStatus)}</span></div>
+        <div class="kv-row"><span class="kv-k">PO #</span><span class="kv-v">${empty(p.po)}</span></div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <h3>Schedule</h3>
+      <div class="kv-grid">
+        <div class="kv-row"><span class="kv-k">Plan Start</span><span class="kv-v">${empty(p.planStart)}</span></div>
+        <div class="kv-row"><span class="kv-k">Actual Start</span><span class="kv-v">${empty(p.actualStart)}</span></div>
+        <div class="kv-row"><span class="kv-k">Plan Finish</span><span class="kv-v">${empty(p.planFinish)}</span></div>
+        <div class="kv-row"><span class="kv-k">Actual Finish</span><span class="kv-v">${empty(p.actualFinish)}</span></div>
+        <div class="kv-row"><span class="kv-k">Machine Delivery</span><span class="kv-v">${empty(p.machineDelivery)}</span></div>
+        <div class="kv-row"><span class="kv-k">Phasing</span><span class="kv-v">${empty(p.phasing)}</span></div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <h3>Actions & Remarks</h3>
+      <div class="kv-grid" style="grid-template-columns:1fr;">
+        <div class="kv-row"><span class="kv-k">Present Action</span><span class="kv-v">${empty(p.presentAction)}</span></div>
+        <div class="kv-row"><span class="kv-k">Next Action</span><span class="kv-v">${empty(p.nextAction)}</span></div>
+        <div class="kv-row"><span class="kv-k">Remarks</span><span class="kv-v">${empty(p.remarks)}</span></div>
+      </div>
+    </div>
+  `;
+  $('modal').classList.add('open');
+}
+$('modalClose').addEventListener('click', ()=>$('modal').classList.remove('open'));
+$('modal').addEventListener('click', (e)=>{ if (e.target.id === 'modal') $('modal').classList.remove('open'); });
+document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') $('modal').classList.remove('open'); });
+
+// ─── Charts ────────────────────────────────────────────────────
+let cDiv, cStatus, cBudget;
+const chartFontFamily = "'Inter',sans-serif";
+Chart.defaults.font.family = chartFontFamily;
+Chart.defaults.color = '#5C4A3A';
+Chart.defaults.borderColor = '#E8DDC4';
+Chart.register(ChartDataLabels);
+
+function renderCharts(rows){
+  // By division (count + budget)
+  const divMap = {};
+  rows.forEach(p=>{
+    const d = p.divisionShort || 'Other';
+    if (!divMap[d]) divMap[d] = {count:0, budget:0};
+    divMap[d].count++;
+    divMap[d].budget += p.budget;
+  });
+  const dKeys = Object.keys(divMap).sort();
+  const dCounts = dKeys.map(k=>divMap[k].count);
+  const dBudgets = dKeys.map(k=>divMap[k].budget);
+  const colors = ['#8B1A1A','#D4A017','#1A5FA3','#0D7C4F','#A0522D','#6B4423','#B8860B','#5C4A3A'];
+
+  const dCountTotal = dCounts.reduce((a,b)=>a+b,0);
+  if (cDiv) cDiv.destroy();
+  cDiv = new Chart($('cDiv'),{
+    type:'bar',
+    data:{
+      labels:dKeys,
+      datasets:[{
+        label:'Projects',
+        data:dCounts,
+        backgroundColor:dKeys.map((_,i)=>colors[i%colors.length]),
+        borderRadius:6,
+        borderWidth:0,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      indexAxis:'y',
+      layout:{padding:{right:48}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1F1611',padding:10,cornerRadius:6,
+          callbacks:{label:(ctx)=>{
+            const v = ctx.parsed.x;
+            const pct = dCountTotal ? ((v/dCountTotal)*100).toFixed(1) : 0;
+            return ` ${v} project(s) — ${pct}%`;
+          }}
+        },
+        datalabels:{
+          anchor:'end', align:'right', clamp:true,
+          color:'#1F1611',
+          font:{family:"'Inter',sans-serif",size:11,weight:'700'},
+          formatter:(v)=> v
+        }
+      },
+      scales:{
+        x:{beginAtZero:true,ticks:{precision:0},grid:{color:'#F0E6CC'}},
+        y:{grid:{display:false},ticks:{font:{size:11,weight:'600'}}}
+      }
+    }
+  });
+
+  // Status pie
+  const statusCounts = {
+    'In Progress':rows.filter(p=>p.status==='IP').length,
+    'Completed':rows.filter(p=>p.status==='CO').length,
+    'On Hold':rows.filter(p=>p.status==='HOL').length,
+    'Not Started':rows.filter(p=>p.status==='').length,
+  };
+  const statusValues = Object.values(statusCounts);
+  const statusTotal = statusValues.reduce((a,b)=>a+b,0);
+  if (cStatus) cStatus.destroy();
+  cStatus = new Chart($('cStatus'),{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(statusCounts),
+      datasets:[{
+        data:statusValues,
+        backgroundColor:['#1A5FA3','#0D7C4F','#B8860B','#8B7355'],
+        borderColor:'#fff',borderWidth:3,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      cutout:'62%',
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,padding:12,font:{size:11.5,weight:'600'}}},
+        tooltip:{
+          backgroundColor:'#1F1611',padding:10,cornerRadius:6,
+          callbacks:{label:(ctx)=>{
+            const v = ctx.parsed;
+            const pct = statusTotal ? ((v/statusTotal)*100).toFixed(1) : 0;
+            return ` ${ctx.label}: ${v} (${pct}%)`;
+          }}
+        },
+        datalabels:{
+          color:'#fff',
+          font:{family:"'Inter',sans-serif",size:11,weight:'800'},
+          textStrokeColor:'rgba(0,0,0,.35)', textStrokeWidth:2,
+          formatter:(v)=> v ? v : '',
+          textAlign:'center',
+          display:(ctx)=> ctx.dataset.data[ctx.dataIndex] > 0
+        }
+      }
+    }
+  });
+
+  // Budget by division
+  const dBudgetTotal = dBudgets.reduce((a,b)=>a+b,0);
+  if (cBudget) cBudget.destroy();
+  cBudget = new Chart($('cBudget'),{
+    type:'bar',
+    data:{
+      labels:dKeys,
+      datasets:[{
+        label:'Budget',
+        data:dBudgets,
+        backgroundColor:dKeys.map((_,i)=>colors[i%colors.length]),
+        borderRadius:6,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:28}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1F1611',padding:10,cornerRadius:6,
+          callbacks:{label:(ctx)=>{
+            const v = ctx.parsed.y;
+            const pct = dBudgetTotal ? ((v/dBudgetTotal)*100).toFixed(1) : 0;
+            return ` OMR ${fmtFull(v)} — ${pct}%`;
+          }}
+        },
+        datalabels:{
+          anchor:'end', align:'top', clamp:true,
+          color:'#1F1611',
+          font:{family:"'Inter',sans-serif",size:10,weight:'700'},
+          formatter:(v)=> v ? fmtOMR(v) : '',
+          textAlign:'center',
+          display:(ctx)=> ctx.dataset.data[ctx.dataIndex] > 0
+        }
+      },
+      scales:{
+        y:{beginAtZero:true,grid:{color:'#F0E6CC'},ticks:{callback:(v)=>fmtOMR(v),font:{size:10.5}}},
+        x:{grid:{display:false},ticks:{font:{size:10,weight:'600'},maxRotation:30,minRotation:0}}
+      }
+    }
+  });
+}
+
+// ─── Wire up ───────────────────────────────────────────────────
+['fDivision','fYear','fStatus','fFinal','fAsset','fOwner'].forEach(id=>{
+  $(id).addEventListener('change', e=>{
+    const k = id === 'fDivision' ? 'division' :
+              id === 'fYear' ? 'year' :
+              id === 'fStatus' ? 'status' :
+              id === 'fFinal' ? 'finalStatus' :
+              id === 'fAsset' ? 'asset' : 'owner';
+    state[k] = e.target.value;
+    if (id !== 'fStatus') state.kpiActive = 'all'; // reset KPI active when other filters change
+    render();
+  });
+});
+$('fSearch').addEventListener('input', e=>{state.search = e.target.value; render();});
+
+$('btnClear').addEventListener('click', ()=>{
+  state = {search:'',division:'',year:'',status:'__ALL__',finalStatus:'',asset:'',owner:'',sortKey:'code',sortDir:'asc',kpiActive:'all'};
+  $('fDivision').value=''; $('fYear').value=''; $('fStatus').value='__ALL__';
+  $('fFinal').value=''; $('fAsset').value=''; $('fOwner').value=''; $('fSearch').value='';
+  render();
+});
+
+document.querySelectorAll('thead th[data-sort]').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const k = th.dataset.sort;
+    if (state.sortKey === k){
+      state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      state.sortKey = k;
+      state.sortDir = 'asc';
+    }
+    render();
+  });
+});
+
+document.querySelectorAll('.kpi').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const k = el.dataset.kpi;
+    state.kpiActive = (state.kpiActive === k) ? 'all' : k;
+    render();
+  });
+});
+
+$('btnCsv').addEventListener('click', ()=>{
+  const rows = sorted(filtered());
+  const cols = ['code','name','division','unit','owner','leader','assetClass','class','status','finalStatus','budget','spent','committed','balance','planStart','actualStart','planFinish','actualFinish','presentAction','nextAction','remarks','po'];
+  const csv = [cols.join(',')].concat(
+    rows.map(r => cols.map(c => {
+      const v = r[c]==null?'':String(r[c]);
+      return /[",\n]/.test(v) ? `"${v.replace(/"/g,'""')}"` : v;
+    }).join(','))
+  ).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'OFM_Projects_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+});
+
+$('btnPrint').addEventListener('click', ()=>window.print());
+
+// First render
+loadProjects();
+setInterval(loadProjects,5*60*1000);
+(function(){{const b=document.getElementById('btnRefresh');if(b)b.addEventListener('click',loadProjects);}})();
+</script>
+</body>
+</html>
